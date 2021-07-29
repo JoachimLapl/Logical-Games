@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Rikudo</title>
+    <link rel="apple-touch-icon">
+    <link rel="icon" size="192x192">
+    <style>
+        html,
+        body,
+        svg {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            user-select: none;
+            background: #fd0;
+        }
+    </style>
+</head>
+
+<body>
+    <svg viewBox="-50 -50 100 100">
+        <style>
+            text {
+                text-anchor: middle;
+                dominant-baseline: middle;
+                fill: #000;
+                font-size: 5px;
+                stroke: none;
+            }
+        </style>
+    </svg>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+        const links = [...document.getElementsByTagName('link')];
+        const svg = $('svg');
+        var hexLen = 10;
+        const cos30 = Math.cos(Math.PI / 6), sin30 = Math.sin(Math.PI / 6);
+        const cos60 = Math.cos(Math.PI / 3), sin60 = Math.sin(Math.PI / 3);
+        Object.defineProperties(this, {
+            asqrt3: {
+                get: function () {
+                    return hexLen * 3 ** .5;
+                }
+            },
+            separate: {
+                get: () => asqrt3 // +1
+            }
+        });
+        Object.defineProperties(Array.prototype, {
+            from1to: {
+                value: function (n) {
+                    for (let i = 1; i < n + 1; i++) {
+                        this[i] = i;
+                    };
+                    return this;
+                }
+            }
+        });
+        function GElement() {
+            svg.insertAdjacentHTML('beforeend', '<g newg></g>');
+            this.g = $('[newg]', svg);
+            this.g.removeAttribute('newg');
+            return this.g;
+        }
+        function Hexagon(x, y, parent = svg) {
+            const a = Math.round(hexLen*1e3)*1e-3, b = Math.round(cos30 * hexLen * 1e3) * 1e-3, c = Math.round(sin30 * hexLen * 1e3) * 1e-3;
+            parent.insertAdjacentHTML('beforeend', `<g type=hexagon newhex><path d="m0,${-a}l${b},${c}v${a}l${-b},${c}l${-b},${-c}v${-a}z"/><g>`)
+            this.el = $('g[newhex]', svg);
+            this.el.removeAttribute('newhex');
+            this.el.x = x;
+            this.el.y = y;
+            this.el.setAttribute('transform', `translate(${Math.round((x + y * cos60) * separate*1e3)*1e-3},${Math.round(y * sin60 * separate*1e3)*1e-3})`);
+            parent.insertAdjacentHTML('beforeend', `<text x=${Math.round((x + y * cos60) * separate*1e3)*1e-3} y=${Math.round(y * sin60 * separate*1e3)*1e-3}>${x},${y}</text>`)
+            return this.el;
+        }
+        function CircleHexaMatrix(radius) {
+            this.data = [];
+            this.radius = radius;
+            this.width = (radius * 2 + 1) * separate + 1;
+            this.height = ((radius * 2 + 1) * sin60 + sin30 / 2) * separate + 2;
+            this.g = new GElement();
+            this.g.setAttribute('fill', '#fff');
+            this.g.setAttribute('stroke', '#fb0');
+            this.elements = [];
+            for (let i = -radius; i <= radius; i++) {
+                this.data[i] = [];
+                this.elements[i] = [];
+                for (let j = -radius; j <= radius; j++) {
+                    if (Math.abs(i + j) <= radius) {
+                        this.data[i][j] = true;
+                        this.elements[i][j] = new Hexagon(j, i, this.g);
+                    };
+                };
+            };
+            this.show = function () {
+                this.g.style.display = 'unset';
+                svg.setAttribute('viewBox', `${-this.width / 2} ${-this.height / 2} ${this.width} ${this.height}`);
+                const str = 'data:image/svg+xml;utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-this.width / 2} ${-this.height / 2} ${this.width} ${this.height}">${svg.innerHTML}</svg>`);
+                links.forEach(e => e.href = str);
+            }.bind(this);
+            this.hide = function () {
+                this.g.style.display = 'none';
+            }.bind(this);
+        };
+
+        function findAround(arr, x, y, callback) {
+            // console.log([...arr.map(e => [...e])], x, y, callback);
+            [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 1], [-1, 0]].forEach(a => {
+                // console.log([...arr.map(e => [...e])], [a[1] + y, [...arr.map(e => [...e])]?.[a[1] + y]], [a[0] + x, [...arr.map(e => [...e])]?.[a[1] + y]?.[a[0] + x]]);
+                if (arr?.[a[1] + y]?.[a[0] + x]) {
+                    callback(...a, arr[a[1] + y][a[0] + x]);
+                };
+            });
+        };
+
+        const game = {
+            r: 8,
+            set radius(r) {
+                this.r = Math.max(0, r);
+                this.overage = 6 * (this.r * (this.r + 1) / 2);
+                this.matrix = new CircleHexaMatrix(this.r);
+                this.matrix.show();
+                this.cells = [];
+                const p = [].from1to(game.overage);
+                for (let i in this.matrix.data) {
+                    const y = Number(i);
+                    this.cells[i] = [];
+                    for (let j in this.matrix.data[i]) {
+                        const x = Number(j);
+                        this.cells[i][j] = new Cell(y, x, this.cells, [...p]);
+                    };
+                };
+                this.alreadyFoundNumbers = new Array(this.overage + 1).fill(false);
+                game.init();
+            },
+            get radius() { return r; },
+            matrix: new CircleHexaMatrix(this.r),
+            overage: 6 * (this.r * (this.r + 1) / 2),
+            numberCells: {
+                object: {},
+                add(number, cell) {
+                    this.object[number] = cell;
+                    game.alreadyFoundNumbers[number] = true;
+                },
+                getCell(number) {
+                    console.log()
+                    return this.object[number];
+                }
+            },
+            init() {
+
+            },
+            alreadyFoundNumbers: [],
+            nextFound(n) {
+                for (let i = n + 1; i < this.overage; i++) {
+                    if (this.alreadyFoundNumbers[i]) {
+                        return i;
+                    };
+                };
+            },
+            preFound(n) {
+                for (let i = n - 1; i > 0; i--) {
+                    if (this.alreadyFoundNumbers[i]) {
+                        return i;
+                    };
+                };
+            },
+            cells: [],
+            forEveryCell(callback) {
+                for (let i in this.cells) {
+                    const y = Number(i);
+                    for (let j in this.cells[i]) {
+                        const x = Number(j);
+                        callback(this.cells[i][j], x, y);
+                    };
+                };
+            }
+        };
+
+        class Cell {
+            constructor(row, col, arr, p) {
+                this.row = row;
+                this.col = col;
+                this.neighbors = [];
+                this.v = undefined;
+                this.p = p;
+                Object.defineProperties(p, {
+                    len: {
+                        get: function () {
+                            return this.reduce((s, v) => (s || 0) + !!v);
+                        }
+                    },
+                    total: {
+                        get: function () {
+                            return this.reduce((s, v) => (s || 0) + (v || 0));
+                        }
+                    }
+                })
+                findAround(arr, col, row, function (x, y, a) {
+                    this.neighbors.push(a);
+                    a.neighbors.push(this)
+                }.bind(this))
+                this.changesrelativeToValue = [];
+                // [[0, -1], [1, -1], [1, 0], [0, 1], [-1, 1], [-1, 0]].forEach(a => {
+                //     const [x, y] = [a[1] + row, a[0] + col];
+                //     if (Math.abs(x + y) <= r) {
+
+                //     };
+                // });
+            };
+            distanceTo(otherCell) {
+                const [x, y] = [otherCell.col - this.col, otherCell.row - this.row];
+                return Math.max(Math.abs(x + y), Math.abs(x), Math.abs(y));
+            };
+            set value(v) {
+                this.v = v;
+                this.p.fill(false);
+                this.p[v]=v;
+                const numbers = [game.preFound(v), game.nextFound(v)];
+                const [preNumber, nextNumber] = numbers;
+                const [preCell, nextCell] = numbers.map(e => game.numberCells.getCell(e));
+                game.numberCells.add(v, this);
+                this.changesrelativeToValue.forEach(e => { e(v) });
+                console.log(preCell, nextCell)
+                // pre
+                if (preCell) {
+                    const preDiff = v - preNumber;
+                    const preDist = this.distanceTo(preCell);
+                    game.forEveryCell((c, x, y) => {
+                        if (!c.value) {
+                            const [distToThis, distToPre] = [c.distanceTo(this), c.distanceTo(preCell)];
+                            if (distToThis + distToPre <= preDiff) {
+                                console.group(`${x},${y}`, distToThis + distToPre, preDiff)
+                                for (let i = 0; i < distToThis; i++) {
+                                    console.log(v - i);
+                                    c.p[v - i] = false;
+                                };
+                                for (let i = 0; i < distToPre; i++) {
+                                    console.log(preNumber + i);
+                                    c.p[preNumber + i] = false;
+                                };
+                                console.groupEnd();
+                            } else {
+                                console.group(`${x},${y}`, distToThis + distToPre, preDiff)
+                                for (let i = preNumber; i < v + 1; i++) {
+                                    console.log(i);
+                                    c.p[i] = false;
+                                };
+                                console.groupEnd();
+                            };
+                        };
+                    });
+                };
+                // next
+                if (nextCell) {
+                    const nextDiff = nextNumber - v;
+                    const nextDist = this.distanceTo(nextCell);
+                    game.forEveryCell((c, x, y) => {
+                        if (!c.value) {
+                            const [distToThis, distToNext] = [c.distanceTo(this), c.distanceTo(nextCell)];
+                            console.group(`${x},${y}`, distToThis + distToNext, nextDiff)
+                            if (distToThis + distToNext <= nextDiff) {
+                                for (let i = 0; i < distToThis; i++) {
+                                    console.log(v + i);
+                                    c.p[v + i] = false;
+                                };
+                                for (let i = 0; i < distToNext; i++) {
+                                    console.log(nextNumber - i);
+                                    c.p[nextNumber - i] = false;
+                                };
+                            } else {
+                                for (let i = v; i < nextNumber + 1; i++) {
+                                    console.log(i);
+                                    c.p[i] = false;
+                                };
+                            };
+                            console.groupEnd();
+                        };
+                    });
+                };
+            };
+            get value() {
+                return this.v;
+            };
+        };
+
+    </script>
+</body>
+
+</html>

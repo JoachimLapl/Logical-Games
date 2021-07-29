@@ -1,0 +1,560 @@
+<html>
+
+<head>
+    <title>Compte est Bon</title>
+    <link rel="apple-touch-icon"
+        href="https://cdn2.iconfinder.com/data/icons/picons-basic-3/57/basic3-105_calculator-512.png">
+    <link rel="icon" size="192x192"
+        href="https://cdn2.iconfinder.com/data/icons/picons-basic-3/57/basic3-105_calculator-512.png">
+    <!--<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
+    <style>
+        * {
+            font-family: Times;
+            user-select: none;
+        }
+
+        @keyframes Philéas {
+            0% {
+                background: yellow;
+            }
+
+            25% {
+                background: green;
+            }
+
+            50% {
+                background: blue;
+            }
+
+            75% {
+                background: red;
+            }
+
+            100% {
+                background: yellow;
+            }
+        }
+
+        @keyframes border_color {
+            0% {
+                border-color: yellow;
+                color: yellow;
+            }
+
+            25% {
+                border-color: green;
+                color: green;
+            }
+
+            50% {
+                border-color: blue;
+                color: blue;
+            }
+
+            75% {
+                border-color: red;
+                color: red;
+            }
+
+            100% {
+                border-color: yellow;
+                color: yellow;
+            }
+        }
+
+        @keyframes black_white {
+            0% {
+                background: black;
+            }
+
+            100% {
+                background: white;
+            }
+        }
+
+        td,
+        #target {
+            cursor: pointer;
+            padding: 5px;
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 5px;
+            border: 1px solid;
+            color: white;
+            box-shadow: 1px 1px 3px grey;
+            text-shadow: 1px 1px 1px grey;
+            text-align: center;
+        }
+
+        label {
+            box-shadow: 2px 2px 3px grey;
+        }
+
+        td:hover {
+            opacity: .8;
+            box-shadow: -1px -1px 3px grey;
+        }
+
+        #help:hover {
+            box-shadow: 1px -1px 3px grey;
+        }
+
+        .numbers {
+            border-color: orange;
+            background: linear-gradient(yellow, orange);
+        }
+
+        .signs {
+            border-color: green;
+            background: linear-gradient(greenyellow, green);
+            font-weight: bold;
+        }
+
+        .fa-trash {
+            border-color: red;
+            background: linear-gradient(orangered, red);
+        }
+
+        .equal {
+            border-color: grey;
+            background: linear-gradient(white, grey);
+            font-weight: bold;
+        }
+
+        .result {
+            border-color: purple;
+            background: linear-gradient(palevioletred, purple);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: auto;
+            top:-75px;
+            padding: 0;
+            border: 1px solid #888;
+            width: 80%;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            -webkit-animation-name: animatetop;
+            -webkit-animation-duration: 1s;
+            animation-name: animatetop;
+            animation-duration: 1s;
+            overflow: hidden;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        @-webkit-keyframes animatetop {
+            from {
+                top: -300px;
+                opacity: 0
+            }
+
+            to {
+                top: -75;
+                opacity: 1
+            }
+        }
+
+        @keyframes animatetop {
+            from {
+                top: -300px;
+                opacity: 0
+            }
+
+            to {
+                top: -75;
+                opacity: 1
+            }
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-header {
+            padding: 2px 16px;
+            background-color: #5cb85c;
+            color: white;
+        }
+
+        .modal-body {
+            padding: 2px 16px;
+        }
+
+        .modal-footer {
+            padding: 2px 16px;
+            background-color: #5cb85c;
+            color: white;
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+
+<body onload="updateALL();">
+    <div id="label_align">
+        <label
+            style="border:1px solid;align-self:center;padding:5px;border-radius:5px;background:white;animation: border_color 60s infinite 0s linear;z-index: -1;"
+            for="le_compte_est_bon">&Lopf;&eopf; &copf;&oopf;&mopf;&popf;&topf;&eopf; &eopf;&sopf;&topf;
+            &bopf;&oopf;&nopf;</label>
+    </div>
+    <div style="border: 1px solid black; border-radius: 5px; padding-bottom: 5px; margin-right: 100px; margin-left: 100px; background: url('https://image.freepik.com/free-photo/design-space-paper-textured-background_53876-42312.jpg') center/cover; z-index: -9;"
+        id="le_compte_est_bon">
+        <div style="height: 10px; width: 10px; border-radius: 50%; text-align: center; background: black; color: white; font-size: xx-small; cursor: help;"
+            title="aide" id="help" onclick="newAudio('help');help.desk.style.display='table-cell';">?<div id="help_desk"
+                style="display: none; position: absolute; width: 100%; color: white; background: black; z-index: 99; align-items: center;">
+            </div>
+        </div>
+        <div id="target"
+            style="cursor: default; border-color: blue; background: linear-gradient(rgb(0, 195, 255), blue); width: min-content; margin-top: 10px; position: relative; box-shadow: 3px 3px 5px grey; font-size: 20px;"
+            title="cible">9699690</div>
+        <table id="signs" style="margin-top: 5px; position: relative;">
+            <tr>
+                <td class="signs" onclick="newAudio('signs'); newSign('&plus;');">&plus;</td>
+                <td class="signs" onclick="newAudio('signs'); newSign('&minus;');">&minus;</td>
+                <td class="signs" onclick="newAudio('signs'); newSign('&times;');">&times;</td>
+                <td class="signs" onclick="newAudio('signs'); newSign('&divide;');">&divide;</td>
+            </tr>
+        </table>
+        <table id="numbers" style="position: relative;">
+            <tr>
+                <td class="numbers"
+                    onclick="newAudio('numbers'); newNumber(this.textContent, 0); this.style.display = 'none';">0</td>
+                <td class="numbers"
+                    onclick="newAudio('numbers'); newNumber(this.textContent, 1); this.style.display = 'none';">1</td>
+                <td class="numbers"
+                    onclick="newAudio('numbers'); newNumber(this.textContent, 2); this.style.display = 'none';">2</td>
+                <td class="numbers"
+                    onclick="newAudio('numbers'); newNumber(this.textContent, 3); this.style.display = 'none';">3</td>
+                <td class="numbers"
+                    onclick="newAudio('numbers'); newNumber(this.textContent, 4); this.style.display = 'none';">4</td>
+            </tr>
+        </table>
+        <div id="container" style="border: 1px solid; border-radius: 5px; margin-top: 10px; padding: 5px;">
+            <table id="answers" style="position: relative;">
+                <tr>
+                    <td class="numbers" style="display: none;"></td>
+                    <td class="signs" style="display: none;"></td>
+                    <td class="numbers" style="display: none;"></td>
+                    <td class="equal" style="display: none;">=</td>
+                    <td class="result" style="display: none;"></td>
+                    <td class="fas fa-trash" style="display: none;" onclick="trash(0);">
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="cursor: cell;border-radius: 5px; margin-top: 10px; padding: 5px; text-align: center; color:white; text-shadow: 1px 1px 3px black;"
+            onclick="Game.clear(); Game.changeNumbers(); Game.changeTarget(); Game.style();" id="new"> NEW</div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Woohoo!</h2>
+            </div>
+            <div class="modal-body">
+                <p>Vous avez gagné!</p>
+            </div>
+            <div class="modal-footer">
+                <h3>super</h3>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        var modal = document.getElementById("myModal");
+        window.addEventListener("resize", function () { updateALL(); });
+        var many = {}; manyE0(); function manyE0() { for (m = 20; m > 0; m -= 1) { many[m] = 0; }; };
+        var Game = {
+            id: document.querySelector('body'),
+            changeNumbers: function () {
+                numbers.n.on = true; var cont = true;
+                while (cont) {
+                    cont = false; manyE0();
+                    for (c = 0; c < 5; c++) { numbers.n[c] = chooseNumber(); many[numbers.n[c]]++; };
+                    for (m = 20; m > 0; m -= 1) { if (many[m] >= 2) { cont = true; }; };
+                }; numbers.n.on = true;
+            },
+            changeTarget: function () { target.value = undefined; while (target.value == undefined || target.value == NaN) { target.value = findTarget(); }; },
+            style: function () { this.interval = setInterval(updateALL, 20); },
+            clear: function () {
+                container.answer.id.innerHTML = `
+                <tr>
+                    <td class="numbers" style="display: none;"></td>
+                    <td class="signs" style="display: none;"></td>
+                    <td class="numbers" style="display: none;"></td>
+                    <td class="equal" style="display: none;">=</td>
+                    <td class="result" style="display: none;"></td>
+                    <td class="fas fa-trash" style="display: none;"  onclick="trash(0);"></td>
+                </tr>`;
+                numbers.id.rows[0].innerHTML = `
+            <tr>
+                <td class="numbers" onclick="newAudio('numbers'); newNumber(this.textContent, 0); this.style.display = 'none';">0</td>
+                <td class="numbers" onclick="newAudio('numbers'); newNumber(this.textContent, 1); this.style.display = 'none';">1</td>
+                <td class="numbers" onclick="newAudio('numbers'); newNumber(this.textContent, 2); this.style.display = 'none';">2</td>
+                <td class="numbers" onclick="newAudio('numbers'); newNumber(this.textContent, 3); this.style.display = 'none';">3</td>
+                <td class="numbers" onclick="newAudio('numbers'); newNumber(this.textContent, 4); this.style.display = 'none';">4</td>
+            </tr>`;
+                help.desk.style.display = 'none';
+            }
+        }
+        function updateALL() { checkALL(); alignALL(); };
+        function alignALL() {
+            for (ô = 0; ô < numbers.id.rows[0].cells.length; ô++) { if (numbers.id.rows[0].cells[ô].textContent == "" + target.value) { modal.style.display = "block"; clearInterval(Game.interval); Game.clear(); Game.changeNumbers(); Game.changeTarget(); setTimeout(function () { modal.style.display = "none"; Game.style; }, 5000); }; };
+            if (container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].textContent != "" && container.answer.id.rows[container.answer.id.rows.length - 1].cells[1].textContent != "" && container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].textContent != "") {
+                if (Math.operator(Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].textContent), container.answer.id.rows[container.answer.id.rows.length - 1].cells[1].textContent, Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].textContent)) != false) {
+                    container.answer.id.rows[container.answer.id.rows.length - 1].cells[3].style.display = "";
+                    container.answer.id.rows[container.answer.id.rows.length - 1].cells[4].style.display = "";
+                    container.answer.id.rows[container.answer.id.rows.length - 1].cells[4].textContent = Math.operator(Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].textContent), container.answer.id.rows[container.answer.id.rows.length - 1].cells[1].textContent, Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].textContent));
+                    numbers.id.rows[0].insertAdjacentHTML("beforeend", '<td class="numbers" onclick="newAudio(`numbers`); newNumber(' + Math.operator(Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].textContent), container.answer.id.rows[container.answer.id.rows.length - 1].cells[1].textContent, Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].textContent)) + ', ' + numbers.id.rows[0].cells.length + '); this.style.display = `none`;">' + Math.operator(Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].textContent), container.answer.id.rows[container.answer.id.rows.length - 1].cells[1].textContent, Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].textContent)) + '</td>');
+                    container.answer.id.insertAdjacentHTML("beforeend", `
+                <tr>
+                    <td class="numbers" style="display: none;"></td>
+                    <td class="signs" style="display: none;"></td>
+                    <td class="numbers" style="display: none;"></td>
+                    <td class="equal" style="display: none;">=</td>
+                    <td class="result" style="display: none;"></td>
+                    <td class="fas fa-trash" style="display: none;" onclick="trash(`+ container.answer.id.rows.length + `);"></td>
+                </tr>`);
+                };
+            } else {
+                container.answer.id.rows[container.answer.id.rows.length - 1].cells[3].style.display = "none";
+                container.answer.id.rows[container.answer.id.rows.length - 1].cells[4].style.display = "none";
+            };
+            a = document.querySelectorAll("audio"); for (b = 0; b < a.length; b++) { if (a[b].currentTime >= a[b].duration) { a[b].remove(); } };
+            if (numbers.n.on) { for (c = 0; c < 5; c++) { numbers.id.rows[0].cells[c].innerHTML = "" + numbers.n[c]; }; };
+            target.id.innerHTML = target.value;
+            label_align.id.style.paddingLeft = (label_align.props.width - label.props.width - label.props.padding * 32) / 2 + "px";
+            signs.id.style.left = (whole.props.width - signs.props.width) / 2 + "px";
+            numbers.id.style.left = (whole.props.width - numbers.props.width) / 2 + "px";
+            target.id.style.left = (whole.props.width - target.props.width) / 2 + "px";
+            help.desk.style.width = whole.props.width + "px";
+            container.answer.id.style.left = (container.props.width - document.getElementById('answers').scrollWidth) / 2 + "px";
+        };
+
+        var label_align, label, target = { value: undefined }, signs = { s: { 0: "&plus;", 1: "&minus;", 2: "&times;", 3: "&divide;" } }, numbers = { n: { on: true } }, whole, help = { desk: document.getElementById('help_desk') };
+        function checkALL() {
+            if (target.value == undefined || target.value > 999) { console.clear(); Game.changeNumbers(); Game.changeTarget(); Game.style(); };
+            label_align = {
+                id: document.getElementById('label_align'),
+                props: {
+                    left: Number(document.getElementById('label_align').style.left.slice(0, document.getElementById('label_align').style.left.length - 2)),
+                    top: Number(document.getElementById('label_align').style.top.slice(0, document.getElementById('label_align').style.top.length - 2)),
+                    height: document.getElementById('label_align').clientHeight,
+                    width: document.getElementById('label_align').clientWidth
+                }
+            };
+            label = {
+                id: document.querySelector('label'),
+                props: {
+                    left: Number(document.querySelector('label').style.left.slice(0, document.querySelector('label').style.left.length - 2)),
+                    top: Number(document.querySelector('label').style.top.slice(0, document.querySelector('label').style.top.length - 2)),
+                    height: document.querySelector('label').clientHeight,
+                    width: document.querySelector('label').clientWidth,
+                    padding: 5
+                }
+            };
+            target.id = document.getElementById('target');
+            target.props = {
+                left: Number(document.getElementById('target').style.left.slice(0, document.getElementById('target').style.left.length - 2)),
+                top: Number(document.getElementById('target').style.top.slice(0, document.getElementById('target').style.top.length - 2)),
+                height: document.getElementById('target').clientHeight,
+                width: document.getElementById('target').clientWidth
+            };
+            signs = {
+                id: document.querySelectorAll('table')[0],
+                props: {
+                    left: Number(document.getElementById('signs').style.left.slice(0, document.getElementById('signs').style.left.length - 2)),
+                    top: Number(document.getElementById('signs').style.top.slice(0, document.getElementById('signs').style.top.length - 2)),
+                    height: document.getElementById('signs').clientHeight,
+                    width: document.getElementById('signs').clientWidth
+                },
+                s: {
+                    0: "&plus;",
+                    1: "&minus;",
+                    2: "&times;",
+                    3: "&divide;"
+                },
+                inns: {
+                    /*"+": this.id.rows[0].cells[0],
+                    "-": this.id.rows[0].cells[1],
+                    "*": this.id.rows[0].cells[2],
+                    "/": this.id.rows[0].cells[3],*/
+                }
+            };
+            numbers.id = document.querySelectorAll('table')[1];
+            numbers.props = {
+                left: Number(document.getElementById('numbers').style.left.slice(0, document.getElementById('numbers').style.left.length - 2)),
+                top: Number(document.getElementById('numbers').style.top.slice(0, document.getElementById('numbers').style.top.length - 2)),
+                height: document.getElementById('numbers').clientHeight,
+                width: document.getElementById('numbers').clientWidth
+            };
+            container = {
+                id: document.getElementById('container'),
+                props: {
+                    left: Number(document.getElementById('container').style.left.slice(0, document.getElementById('container').style.left.length - 2)),
+                    top: Number(document.getElementById('container').style.top.slice(0, document.getElementById('container').style.top.length - 2)),
+                    height: document.getElementById('container').clientHeight,
+                    width: document.getElementById('container').clientWidth
+                },
+                answer: { id: document.querySelectorAll('table')[2] }
+            };
+            whole = {
+                id: document.getElementById('le_compte_est_bon'),
+                props: {
+                    left: Number(document.getElementById('le_compte_est_bon').style.left.slice(0, document.getElementById('le_compte_est_bon').style.left.length - 2)),
+                    top: Number(document.getElementById('le_compte_est_bon').style.top.slice(0, document.getElementById('le_compte_est_bon').style.top.length - 2)),
+                    height: document.getElementById('le_compte_est_bon').clientHeight,
+                    width: document.getElementById('le_compte_est_bon').clientWidth
+                }
+            };
+            help = {
+                id: document.getElementById('help'),
+                desk: document.getElementById('help_desk')
+            };
+        };
+        Math.operator = function (num1, operator, num2) {
+            if (operator == "plus" || operator == "add" || operator == "+" || operator == "&plus;") {
+                return (num1 + num2);
+            } else if (operator == "minus" || operator == "subtract" || operator == "-" || operator == "&minus;" || operator == "−") {
+                if (num1 - num2 >= 0) {
+                    return (num1 - num2);
+                } else { return false; };
+            } else if (operator == "times" || operator == "multiply" || operator == "*" || operator == "&times;" || operator == "×") {
+                return (num1 * num2);
+            } else if (operator == "divided" || operator == "/" || operator == "&divide;" || operator == "÷") {
+                if (num1 % num2 == 0) {
+                    return (num1 / num2);
+                } else { return false; };
+            } else if (operator == "power" || operator == "^") {
+                return Math.pow(num1, num2);
+            } else if (operator == "modulus" || operator == "modulo" || operator == "mod" || operator == "%") {
+                return (num1 % num2);
+            } else { return false; };
+        };
+        function chooseNumber() { var n = 0; if (Math.floor(Math.random() * 6) + 1 == 6) { n = 10; } return Math.floor(Math.random() * 9) + 1 + n; };
+        function findTarget() {
+            var Rand = N_Operations(), arr = [numbers.n[0], numbers.n[1], numbers.n[2], numbers.n[3], numbers.n[4]], x9491568 = [numbers.n[0], numbers.n[1], numbers.n[2], numbers.n[3], numbers.n[4]]; rdh = true, a = { n: [], a: [] };
+            while (rdh) {
+                arr = [numbers.n[0], numbers.n[1], numbers.n[2], numbers.n[3], numbers.n[4]];
+                rdh = false; Rand = N_Operations();
+                help.desk.innerHTML = "";
+                while (Rand > 0) {
+                    var n1 = Math.floor(Math.random() * arr.length);
+                    var n_1 = arr[n1];
+                    arr.splice(n1, 1);
+                    var n2 = Math.floor(Math.random() * arr.length);
+                    var n_2 = arr[n2];
+                    arr.splice(n2, 1);
+                    var s = signs.s[Math.floor(Math.random() * 4)];
+                    var newNumber = Math.operator(n_1, s, n_2);
+                    if (newNumber != false && newNumber != n_1 && newNumber != n_2) {
+                        a.n[a.n.length] = n_1; a.n[a.n.length] = n_2; a.a[a.a.length] = newNumber;
+                        help.desk.insertAdjacentHTML("beforeend", '<div id="`' + newNumber + '`">' + n_1 + s + n_2 + " = " + newNumber + '</div>');
+                        arr[arr.length] = newNumber;
+                        Rand -= 1;
+                    } else {
+                        arr[arr.length] = n_1; arr[arr.length] = n_2;
+                    };
+                };
+                for (Ω = 0; Ω < a.a.length; Ω++) { if (!a.n.includes(a.a[Ω]) && a.a[Ω] != arr[arr.length - 1]) { document.getElementById('`' + a.a[Ω] + '`').remove(); }; };
+                if (!x9491568.includes(arr[arr.length - 1])) { return arr[arr.length - 1]; } else { rdh = true; };
+            };
+        };
+        Game.changeNumbers(); Game.changeTarget(); Game.style();
+        function N_Operations() {
+            var R = Math.floor(Math.random() * 10 + 1);
+            if (R == 1) {
+                return 1;
+            } else if (R > 1 && R < 4) {
+                return 2;
+            } else if (R > 4 && R < 7) {
+                return 3;
+            } else if (R > 6) {
+                return 4;
+            };
+        };
+        newNumber = function (number, which) {
+            if (container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].textContent == "") {
+                container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].textContent = number;
+                container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].value = which;
+                container.answer.id.rows[container.answer.id.rows.length - 1].cells[0].style.display = "";
+            } else {
+                if (container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].textContent != "") {
+                    numbers.id.rows[0].cells[Number(container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].value)].style.display = "";
+                }
+                container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].textContent = number;
+                container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].value = which;
+                container.answer.id.rows[container.answer.id.rows.length - 1].cells[2].style.display = "";
+            }
+            container.answer.id.rows[container.answer.id.rows.length - 1].cells[5].style.display = "";
+        };
+        newSign = function (sign) {
+            container.answer.id.rows[container.answer.id.rows.length - 1].cells[1].textContent = sign;
+            container.answer.id.rows[container.answer.id.rows.length - 1].cells[1].style.display = "";
+            container.answer.id.rows[container.answer.id.rows.length - 1].cells[5].style.display = "";
+        };
+        var audio = {
+            "finished": "http://soundbible.com/mp3/Tiny%20Button%20Push-SoundBible.com-513260752.mp3",
+            "numbers": "http://soundbible.com/mp3/Mouse%20Double%20Click%202-SoundBible.com-1252820588.mp3",
+            "signs": "http://soundbible.com/mp3/Button-SoundBible.com-1420500901.mp3",
+            "trash": "http://soundbible.com/mp3/Whip-SoundBible.com-1988767601.mp3",
+            "help": "http://soundbible.com/mp3/stephan_schutze-anvil_impact_1x-894647867.mp3",
+        };
+        function newAudio(type) { document.querySelector("body").insertAdjacentHTML("afterbegin", '<audio autoplay src="' + audio[type] + '"></audio>'); };
+        function trash(n) {
+            for (h = container.answer.id.rows.length - 1; h > Number(n) - 1; h -= 1) {
+                console.log(h);
+                if (container.answer.id.rows[h].cells[0].value != undefined) {
+                    numbers.id.rows[0].cells[container.answer.id.rows[h].cells[0].value].style.display = "";
+                    console.log(container.answer.id.rows[h].cells[2].value, container.answer.id.rows[h].cells[2])
+                    if (container.answer.id.rows[h].cells[2].value != undefined) {
+                        numbers.id.rows[0].cells[container.answer.id.rows[h].cells[2].value].style.display = "";
+                        console.log(numbers.id.rows[0].cells.length + " > " + h + " = " + (numbers.id.rows[0].cells.length > h));
+                        if (numbers.id.rows[0].cells.length > h+5) {
+                            numbers.id.rows[0].cells[h+5].remove();
+                        }
+                    }
+                }
+                container.answer.id.rows[h].remove();
+            }
+            container.answer.id.insertAdjacentHTML("beforeend", `
+                <tr>
+                    <td class="numbers" style="display: none;"></td>
+                    <td class="signs" style="display: none;"></td>
+                    <td class="numbers" style="display: none;"></td>
+                    <td class="equal" style="display: none;">=</td>
+                    <td class="result" style="display: none;"></td>
+                    <td class="fas fa-trash" style="display: none;" onclick="trash(`+ container.answer.id.rows.length + `);"></td>
+                </tr>`);
+        }
+        setTimeout(function(){document.getElementById("new").click();},20);
+    </script>
+</body>
+
+</html>

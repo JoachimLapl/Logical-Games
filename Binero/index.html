@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Binero</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            user-select: none;
+        }
+
+        table {
+            height: 50vmin;
+            width: 50vmin;
+            background: #000;
+        }
+
+        td {
+            height: var(--tdH);
+            width: var(--tdH);
+            background: #fff;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <table></table>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+
+        function Element(tag, attributes = {}, methods = {}) {
+            this.r = document.createElement(tag);
+            for (let i in attributes) {
+                this.r.setAttribute(i, attributes[i]);
+            };
+            for (let i in methods) {
+                this.r[i] = methods[i];
+            };
+            return this.r;
+        };
+
+        Object.defineProperties(Array.prototype, {
+            total: {
+                value: function (callback = x => x) {
+                    var s = 0;
+                    for (let i of this) {
+                        s += callback(i);
+                    };
+                    return s;
+                }
+            },
+            _filter: {
+                value: function (callback) {
+                    var a = [...this], b = 0;
+                    a.forEach((e, i) => {
+                        if (!callback(e)) {
+                            this.splice(i - (b++), 1);
+                        };
+                    });
+                    return this;
+                }
+            }
+        });
+
+        const game = {
+            table: $('table'),
+            init: function () {
+                this.table.innerHTML = "";
+                this.d = [];
+                for (let i = 0; i < this.height; i++) {
+                    const tr = new Element('tr');
+                    this.table.appendChild(tr);
+                    this.d[i] = [];
+                    for (let j = 0; j < this.width; j++) {
+                        this.d[i][j] = [false, false];
+                        const td = new Element('td');
+                        tr.appendChild(td);
+                        td.row = i, td.col = j;
+                        // td.onclick = function ({ target }) {
+                        //     const [x, y] = [target.col, target.row];
+                        //     this.d[y][x] = Number(!this.d[y][x]);
+                        // }.bind(this);
+                    };
+                };
+                this.auto = createGame(this.d, this.auto);
+                this.auto.forEach(a => {
+                    this.table.rows[a[0][0]].cells[a[0][1]].innerHTML = Number(a[1][1]);
+                });
+                document.documentElement.style.setProperty('--tdH',Math.min((innerHeight-2*(game.height+1))/game.height,(innerWidth-2*(game.width+1))/game.width)+'px')
+            },
+            d: [],
+            auto: [],
+            height: 10,
+            width: 10
+        };
+
+        function askFor(message, _default, err = `the ${message} must be a strictly positive even number`) {
+            const p = prompt(message, _default);
+            if (p) {
+                const n = Number(p);
+                if (n) {
+                    if (n % 2 !== 0) {
+                        alert(err);
+                        askFor(...arguments);
+                    } else {
+                        return n;
+                    }
+                };
+            };
+        };
+        const setGameSize = function (hw) {
+            game[hw] = askFor(hw, '2,4,6,8,10...')
+        };
+
+        const [double, inter, number] = [
+            function (data) {
+                var cont = false;
+                for (let i = 0; i < data.length; i++) {
+                    for (let j = 0; j < data[i].length; j++) {
+                        const cell = data?.[i]?.[j];
+                        if (cell?.[0]) {
+                            [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([x, y]) => {
+                                const cell2 = data?.[i + y]?.[j + x];
+                                if (cell2?.[0]) {
+                                    if (cell2[1] === cell[1]) {
+                                        const [cell3, cell4] = [data?.[i - y]?.[j - x], data?.[i + y * 2]?.[j + x * 2]];
+                                        if (cell3 && !cell3[0]) {
+                                            cell3[0] = true;
+                                            cell3[1] = !cell[1];
+                                            cont = true;
+                                        };
+                                        if (cell4 && !cell4[0]) {
+                                            cell4[0] = true;
+                                            cell4[1] = !cell[1];
+                                            cont = true;
+                                        };
+                                    };
+                                };
+                            });
+                        };
+                    };
+                };
+                return cont;
+            },
+            function (data) {
+                var cont = false;
+                for (let i = 0; i < data.length; i++) {
+                    for (let j = 0; j < data[i].length; j++) {
+                        const cell = data?.[i]?.[j];
+                        if (cell?.[0]) {
+                            [[-2, 0], [2, 0], [0, -2], [0, 2]].forEach(([x, y]) => {
+                                const cell2 = data?.[i + y]?.[j + x];
+                                if (cell2?.[0]) {
+                                    if (cell2[1] === cell[1]) {
+                                        const cell3 = data?.[i + y / 2]?.[j + x / 2];
+                                        if (cell3 && !cell3[0]) {
+                                            cell3[0] = true;
+                                            cell3[1] = !cell[1];
+                                            cont = true;
+                                        };
+                                    };
+                                };
+                            });
+                        };
+                    };
+                };
+                return cont;
+            },
+            function (data) {
+                var cont = false;
+                // lines
+                data.forEach(r => {
+                    const f = r.filter(c => c[0]), d = r.filter(c => !c[0]);
+                    const n1 = f.total(a => a[1]);
+                    const n0 = f.length - n1;
+                    const [r1, r0] = [r.length / 2 - n1, r.length / 2 - n0];
+                    if (r1 === 0 && r0 !== 0) {
+                        d.forEach(c => { c[0] = true, c[1] = false });
+                        cont = true;
+                    } else if (r0 === 0 && r1 !== 0) {
+                        d.forEach(c => { c[0] = true, c[1] = true });
+                        cont = true;
+                    };
+                });
+                // columns
+                const columns = [];
+                data.forEach((r, i) => {
+                    r.forEach((c, j) => {
+                        (columns[j] = columns[j] || [])[i] = [...c];
+                    });
+                });
+                columns.forEach(c => {
+                    const f = c.filter(c => c[0]), d = c.filter(c => !c[0]);
+                    const n1 = f.total(a => a[1]);
+                    const n0 = f.length - n1;
+                    const [r1, r0] = [c.length - n1, c.length - n0];
+                    if (r1 === 0 && r0 !== 0) {
+                        d.forEach(r => { r[0] = true, r[1] = false });
+                        cont = true;
+                    } else if (r0 === 0 && r1 !== 0) {
+                        d.forEach(r => { r[0] = true, r[1] = true });
+                        cont = true;
+                    };
+                });
+                return cont;
+            }
+        ];
+        function createGame(data, auto) {
+            var cont = true;
+            while (!data.every(e => e.every(m => m[0]))) {
+                cont = true;
+                while (cont) {
+                    cont = false;
+                    while (double(data)) {
+                        cont = true;
+                    };
+                    while (inter(data)) {
+                        cont = true;
+                    };
+                    while (number(data)) {
+                        cont = true;
+                    };
+                };
+                const allPossibleCells = [];
+                data.forEach((a, i) => {
+                    a.forEach((b, j) => {
+                        if (!b[0]) {
+                            allPossibleCells.push([[i, j], b]);
+                        };
+                    });
+                });
+                if (allPossibleCells.length > 0) {
+                    const TF = Math.random() < .5;
+                    const randomCell = allPossibleCells[Math.floor(allPossibleCells.length * Math.random())];
+                    const cell = data[randomCell[0][0]][randomCell[0][1]];
+                    cell[0] = true;
+                    cell[1] = TF;
+                    auto.push([randomCell[0], cell]);
+                };
+            };
+            return auto.filter((a, i) => {
+                const b = [...auto.map(e => [...e.map(i => [...i])])];
+                const c = b.splice(i, 1);
+                return tryWithout(data, b, c);
+            });
+        };
+        const tryWithout = (data, autoArr, a) => {
+            const d = [];
+            for (let i = 0; i < data.length; i++) {
+                d[i] = []
+                for (let j = 0; j < data[i].length; j++) {
+                    d[i][j] = [false, false];
+                };
+            };
+            autoArr.forEach(a => {
+                d[a[0][0]][a[0][1]] = a[1];
+            });
+            var cont = true;
+            while (cont) {
+                cont = false;
+                while (double(d)) {
+                    cont = true;
+                };
+                while (inter(d)) {
+                    cont = true;
+                };
+                while (number(d)) {
+                    cont = true;
+                };
+            };
+            console.log(a.toString(), [...d.map(e => [...e])])
+            return !d.every(e => e.every(m => m[0]));
+        };
+    </script>
+</body>
+
+</html>

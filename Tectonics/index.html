@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tectonics</title>
+    <link rel="apple-touch-icon" href="" id="icon1">
+    <link rel="icon" size="192x192" href="" id="icon2">
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        *::selection {
+            color: white;
+            background: yellow;
+        }
+
+        :root {
+            --color-walls-classic: black;
+            --color-sep-classic: grey;
+            --color-walls-easy: #00FF00;
+            --color-sep-easy: #AFFFAF;
+            --color-walls-medium: #FFFF00;
+            --color-sep-medium: #FFFFAF;
+            --color-walls-hard: #FF0000;
+            --color-sep-hard: #FFAFAF;
+        }
+
+        * {
+            margin: 0;
+            transform-style: preserve-3d;
+        }
+
+        [tectonic] td {
+            background: white;
+            border-radius: 5px;
+        }
+
+        td {
+            height: 50px;
+            width: 50px;
+            border: 1px solid var(--color-sep-classic);
+            text-align: center;
+        }
+
+        [tectonic] {
+            border-collapse: collapse;
+            box-shadow: 3px 3px 3px grey;
+        }
+
+        td[up] {
+            border-top: 3px solid var(--color-walls-classic);
+        }
+
+        td[down] {
+            border-bottom: 3px solid var(--color-walls-classic);
+        }
+
+        td[left] {
+            border-left: 3px solid var(--color-walls-classic);
+        }
+
+        td[right] {
+            border-right: 3px solid var(--color-walls-classic);
+        }
+
+        [blur] {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            justify-content: center;
+            background: grey;
+            overflow: hidden;
+            color: white;
+        }
+
+        [loader],
+        [error],
+        [long] {
+            text-align: center;
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            align-items: center;
+        }
+
+        [loader] [fu],
+        [error] [fu],
+        [long] [fu] {
+            font-size: 50%;
+        }
+
+        [animation] {
+            position: absolute;
+            top: 45%;
+            perspective: 400px;
+            align-items: center;
+            width: 100%;
+            height: 10px
+        }
+
+        [letter] {
+            width: max-content;
+            transform-origin: 50%, 50%;
+            position: absolute;
+            left: 50%;
+            animation: jump infinite 2.31896713s, movee infinite 10s linear;
+            color: white;
+        }
+
+        [letter]:before {
+            content: 'Tectonics';
+            width: max-content;
+            transform-origin: 50%, 50%;
+            position: absolute;
+            color: white;
+            left: -100vw;
+        }
+
+        @keyframes jump {
+            0% {
+                transform: rotateX(-20deg) translateZ(30px);
+            }
+
+            2% {
+                transform: translateY(0px) translateZ(30px) rotateY(360deg);
+            }
+
+            50% {
+                transform: translateY(-100px) translateZ(30px);
+            }
+
+            95% {
+                transform: translateY(0px) translateZ(30px) rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateX(-20deg) translateZ(30px);
+            }
+        }
+
+        @keyframes movee {
+            0% {
+                left: 0%;
+            }
+
+            50% {
+                left: 50%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        #gamezone {
+            height: 80vh;
+            width: 100vw;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: center;
+            justify-content: center;
+        }
+
+        header {
+            text-align: center;
+            font-size: 8vh;
+            height: 10vh;
+        }
+
+        [edit][placeholder]:before {
+            content: attr(placeholder);
+            font-size: 50%;
+            color: grey;
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-family: cursive;
+        }
+
+        [edit='true'] {
+            color: grey;
+            font-family: cursive;
+            cursor: text;
+        }
+
+        [edit='true']:focus {
+            outline: none;
+            /* transform: scale(1.01);
+            position: absolute;
+            background: white;
+            top: 0%; */
+        }
+
+        [UserInfo] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            border-bottom: .2vmax solid black;
+            font-size: 2vh;
+            user-select: none;
+        }
+
+        [UserInfo]>* {
+            user-select: initial;
+        }
+
+        [UserInfo] table tr td {
+            height: min-content;
+            width: max-content;
+            border: none;
+            font-size: 2vh;
+            text-align: left;
+        }
+
+        [UserInfo] table {
+            border-collapse: collapse;
+        }
+
+        img[profileIMG] {
+            height: 4vh;
+            width: 4vh;
+            border-radius: 2vh;
+            transition: transform .1s, filter .1s;
+            cursor: pointer;
+            clip-path: circle(50% at center);
+        }
+
+        img[profileIMG]:hover {
+            transform: scale(.8);
+            filter: brightness(.7);
+        }
+
+        [type='settings'] {
+            font-size: 4vh;
+            position: relative;
+            transition: transform .2s;
+            transform: rotate(0deg);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        [type='settings']:focus {
+            transform: rotate(-45deg);
+            outline: none;
+        }
+
+        [type='settings']::before {
+            content: '⛭'
+        }
+
+        input[type='file'] {
+            display: none;
+        }
+
+        [popupCanope] {
+            position: absolute;
+            top: 8vh;
+            right: 0;
+            height: 92vh;
+            width: min-content;
+        }
+
+        [popupWrap] {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        [popup] {
+            background: #ddddcc;
+            border: 1px solid black;
+            border-radius: 10px;
+            border-top-right-radius: 0px;
+            color: white;
+            text-shadow: 1px 1px 1px grey;
+            padding: .5vmax;
+            box-shadow: -2px -2px 2px grey;
+            width: max-content;
+            max-width: 25vh;
+            font-size: 150%;
+            margin-bottom: 5px;
+            position: relative;
+            right: 0;
+            user-select: none;
+            animation: fatten .5s ease-out 0s forwards;
+            font-size: 2vmax;
+        }
+
+        [popupMessage] {
+            font-size: 70%;
+            padding-left: 15px;
+            max-width: 22vh;
+        }
+
+        [popup][type='error'] {
+            border-color: red;
+            background: #FFAFAF;
+            color: red;
+            text-shadow: 1px 1px 2px #800000;
+        }
+
+        [popup][type='warn'] {
+            border-color: yellow;
+            background: #FFFFAF;
+            color: yellow;
+            text-shadow: 1px 1px 2px #808000;
+        }
+
+        @keyframes fatten {
+            0% {
+                transform: scale(0);
+                top: 50vh;
+            }
+
+            100% {
+                transform: scale(1);
+                top: 6vh;
+            }
+        }
+
+        [for='settings'] {
+            display: none;
+            top: 6vh;
+            right: 0;
+            z-index: 99;
+        }
+
+        .focus {
+            background: aliceblue !important;
+        }
+
+        /* .focus {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        } */
+
+        .focus::after {
+            /* content: '_'; */
+            /* width: 15px; */
+            /* left: 20px; */
+            animation: fadein 1.5s infinite 0s linear;
+            position: absolute;
+            right: 2.5px;
+            bottom: 2.5px;
+            height: 5px;
+            width: 5px;
+            border-radius: 50%;
+            background: rgb(144, 150, 255);
+            content: '';
+        }
+
+        [edit='false'].focus::after {
+            display: none;
+        }
+
+        @keyframes fadein {
+
+            0% {
+                opacity: .5;
+            }
+
+            5% {
+                opacity: 1;
+            }
+
+            45% {
+                opacity: 1;
+            }
+
+            55% {
+                opacity: 0;
+            }
+
+            95% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: .5;
+            }
+        }
+
+        [options],
+        textbox {
+            position: absolute;
+            display: none;
+            width: max-content;
+            overflow: hidden;
+            border-radius: 5px;
+            border: 3px solid white;
+            background: #ddddcc;
+            box-shadow: 2px 1px 3px grey;
+            text-align: center;
+        }
+
+        [options] *,
+        textbox * {
+            display: block;
+            border-top: .5px solid black;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        [options] *:hover,
+        textbox *:hover {
+            background: #555555;
+            color: white;
+            text-decoration: underline#ddddcc;
+        }
+
+        [option]:first-child,
+        textbox *:first-child {
+            border: none;
+        }
+
+        [errorBackground] {
+            background: #FFAFAF;
+        }
+
+        [warnBackground] {
+            background: #FFFFAF;
+        }
+
+        [score]:hover::before {
+            content: 'score';
+            position: absolute;
+            border-radius: 5px;
+            border: 3px solid white;
+            background: #ddddcc;
+            box-shadow: 2px 1px 3px grey;
+            left: -100%;
+            top: 100%;
+            font-size: 75%;
+        }
+
+        [type='modal'] {
+            position: absolute;
+            animation: comein 1s forwards .5s;
+            display: unset;
+            z-index: 99;
+            height: 80vh;
+            width: 80vw;
+            border-radius: 3vw;
+            background: white;
+            box-shadow: 1px 1px 5px black;
+            overflow: hidden;
+        }
+
+        [type='modal'][open=false] {
+            display: none;
+        }
+
+
+        [type='modal']>[remove] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 3vmax;
+            width: 3vmax;
+            color: white;
+            background: #f00d;
+            opacity: 0;
+            transition: opacity .3s;
+            border: none;
+            border-bottom-left-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5vmax;
+            user-select: none;
+        }
+
+        [type='modal']>[remove]:hover {
+            opacity: 1;
+        }
+
+        [type='modal']>header {
+            border-bottom: 1px solid black;
+        }
+
+        [type='modal'] td {
+            height: min-content;
+            width: max-content;
+            border: none;
+        }
+
+        [ModAllWrap] {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            left: 0;
+            top: 0;
+            box-shadow: inset 0 0 50px black;
+            animation: darken 1s forwards;
+        }
+
+        @keyframes comein {
+            0% {
+                left: 100vw;
+                top: 10vh;
+            }
+
+            100% {
+                left: 10vw;
+                top: 10vh;
+            }
+        }
+
+        @keyframes darken {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        [selected] {
+            background: #bbb;
+            transform: scale(1.1) translateZ(1px);
+            box-shadow: inset 0 0 1vw #fffa !important;
+        }
+
+        [canChange]:hover {
+            box-shadow: inset .25vw .25vw .5vw #aaaa;
+        }
+
+        [canChange] {
+            cursor: pointer;
+            box-shadow: inset -.25vw -.25vw .5vw #aaaa;
+            transition: transform .3s;
+        }
+
+        [type='modal'] [header] table {
+            width: 100%;
+        }
+
+        [type='modal'] [header] td {
+            width: 20%;
+            font-size: 2vw;
+            border: .1vw solid black;
+            cursor: pointer;
+            background: white;
+            transition: transform .3s, border-radius 3s cubic-bezier(0, .68, .3, 1);
+        }
+
+        [type='modal'] [header] td[usèd] {
+            transform: scale(1.1) translateZ(1px);
+            border-radius: 1.5vw;
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        #profileuploadIMG {
+            height: 20vmin;
+            width: 20vmin;
+            clip-path: circle(50% at center);
+            cursor: none;
+        }
+
+        .buttonUser {
+            user-select: none;
+        }
+
+        [firstChanging]:focus,
+        [lastChanging]:focus {
+            outline: none;
+        }
+
+        [switchFREEimg],
+        [switchUSERimg] {
+            height: 20vmin;
+            clip-path: circle(10vmin at center);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <header><span>Tectonics</span>
+        <div style="height: 1.7vw; width: 1.7vw; border-radius: 50%; text-align: center; background: black; color: white; font-size: 1.5vw; cursor: help; user-select: none; display: inline-block;"
+            title="aide" id="help" onclick="newAudio('help');document.querySelector('#help_desk')='table-cell';">?<div
+                id="help_desk"
+                style="display: table-cell; position: absolute; width: 425px; color: white; background: black; z-index: 99; align-items: center;">
+            </div>
+        </div>
+    </header>
+    <div id="gamezone">
+        <table tectonic></table>
+    </div>
+    <div blur>
+        <div animation>
+            <div letter>Tectonics</div>
+        </div>
+        <div loader>
+            <span>Sorry, this process may take a little while.</span><br>
+            <span fu>Don't be so mad though! <br>
+                The time we're taking right now to construct the tectonic would have been lost anyway by you solving
+                it</span>
+        </div>
+        <div error>
+            <span>Oops!</span><br>
+            <span fu>There was a problem loading your game.</span>
+        </div>
+        <div long>
+            <span>The process took too long to respond.</span><br>
+            <span fu>Either the inputs are impossible to use with the dimensions of the tectonic or the mistake is ours.
+                <br> Please retry!!!</span>
+        </div>
+    </div>
+    <div UserInfo>
+        <span score style="font-size:3vh;"></span>&nbsp;
+        <img profileIMG draggable="false" onclick="openModal('account', 'manageProfile')">&nbsp;
+        <table>
+            <tr>
+                <td id=firstname></td>
+            </tr>
+            <tr>
+                <td id=lastname></td>
+            </tr>
+        </table>
+        <button type="settings" onclick="setTimeout(()=>{settings.show()}, 5)"> </button>
+    </div>
+    <textbox for=settings>
+        <div onclick="pause(document.querySelectorAll('[option]')[0], true)">Pause</div>
+        <div onclick="openModal('règles')">Afficher les règles du jeu</div>
+        <div onclick="display('grilles', this)" title="5×5 |5">Changer de grille</div>
+        <div onclick="display('account', this)">Compte JYP</div>
+    </textbox>
+    <textbox for="settings-grilles" grid>
+        <div onclick="tecChange(2,2,4)">2×2 |4</div>
+        <div onclick="tecChange(3,3,4)">3×3 |4</div>
+        <div onclick="tecChange(4,4,4)">4×4 |4</div>
+        <div onclick="tecChange(4,4,5)">4×4 |5</div>
+        <div onclick="tecChange(4,4,6)">4×4 |6</div>
+        <div onclick="tecChange(5,5,4)">5×5 |4</div>
+        <div onclick="tecChange(5,5,5)">5×5 |5</div>
+        <div onclick="tecChange(5,5,6)">5×5 |6</div>
+        <div onclick="tecChange(6,6,5)">6×6 |5</div>
+        <div onclick="tecChange(6,6,6)">6×6 |6</div>
+        <div onclick="tecChange(6,6,7)">6×6 |7</div>
+        <div onclick="tecChange(7,7,6)">7×7 |6</div>
+        <div onclick="tecChange(7,7,7)">7×7 |7</div>
+    </textbox>
+    <textbox for="settings-account" account>
+        <div onclick="openModal('account', 'createAccount')">Créer son compte</div>
+        <div onclick="openModal('account', 'manageAccount')">Gérer son compte</div>
+        <div onclick="openModal('account', 'switchAccount')">Changer de compte</div>
+        <div onclick="openModal('account', 'manageProfile')">Gérer son profile</div>
+        <div onclick="saveAsJYP(User, User.firstname+`'s account`)">Sauvegarder le progrès</div>
+        <div onclick="document.querySelector(`input[type='file']`).click();">Importer son progrès</div>
+    </textbox>
+    <div popupCanope></div>
+    <div options>
+        <div option onclick="pause(this, true)">Pause</div>
+        <div option onclick="openModal('règles')">Afficher les règles du jeu</div>
+        <div option onclick="openModal('grilles')">Changer de grille</div>
+    </div>
+    <div ModAllWrap>
+        <div type=modal modal_for=rules open=false>
+            <!--Modal-->
+            <header>Règles du Jeu</header>
+            <div style="padding: 5vmax; text-align: justify;">
+                Le jeu des tectonics est en théorie très simple, il s'agit de placer des nombres dans les cases d'une
+                aire graduée
+                qui elle-même est divisée en plusieurs tectonics.
+                <br>Cependant, la mise en place de ces nombres est contrainte à certaines règles:
+                <ul>
+                    <li>Chaque bloc contient des nombres entiers consécutifs en partant de 1.
+                        Par exemple, un bloc de quatre cases contiendra les nombres 1,2,3 et 4.</li>
+                    <li>Deux nombres identiques ne doivent pas se toucher, que ce soit horizontalement, verticalement ou
+                        en diagonale.</li>
+                </ul>
+            </div>
+            <div remove onclick="closeModals()"> &times;</div>
+        </div>
+        <div type=modal modal_for=grid open=false>
+            <!--Modal-->
+            <header>Changer de Grille</header>
+            <div style="padding: 5vmax; text-align: justify;">
+                <div style="display: flex; justify-content: center;">
+                    <table>
+                        <tr>
+                            <td colspan="3">
+                                Choisir un type de grille</td>
+                        </tr>
+                        <tr>
+                            <td canChange="2,2,4">2×2 |4</td>
+                            <td canChange="3,3,4">3×3 |4</td>
+                            <td canChange="4,4,4">4×4 |4</td>
+                        </tr>
+                        <tr>
+                            <td canChange="4,4,5">4×4 |5</td>
+                            <td canChange="4,4,5">4×4 |6</td>
+                            <td canChange="5,5,4">5×5 |4</td>
+                        </tr>
+                        <tr>
+                            <td canChange="5,5,5" selected>5×5 |5</td>
+                            <td canChange="5,5,6">5×5 |6</td>
+                            <td canChange="6,6,5">6×6 |5</td>
+                        </tr>
+                        <tr>
+                            <td canChange="6,6,6">6×6 |6</td>
+                            <td canChange="6,6,7">6×6 |7</td>
+                            <td canChange="7,7,6">7×7 |6</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td canChange="7,7,7">7×7 |7</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="display: flex; justify-content: center;">
+                    <button style="cursor: pointer;" onclick="makeChange()">nouvelle grille</button></div>
+                <script>
+                    var changeside = [5, 5, 5];
+                    var ScanChange = document.querySelectorAll('[canChange]');
+                    for (change of ScanChange) change.onclick = e => {
+                        splited = e.target.getAttribute('canChange').split(',');
+                        changeside = [Number(splited[0]), Number(splited[1]), Number(splited[2])]
+                        var selARR = document.querySelectorAll('[selected]')
+                        for (sel of selARR) sel.removeAttribute('selected')
+                        e.target.toggleAttribute('selected')
+                    }
+                    makeChange = () => {
+                        tecChange(changeside[0], changeside[1], changeside[2])
+                    }
+                </script>
+            </div>
+            <div remove onclick="closeModals()"> &times;</div>
+        </div>
+        <div type=modal modal_for=account open=false>
+            <!--Modal-->
+            <header>Compte JYP </header>
+            <div header>
+                <table chooser>
+                    <tr>
+                        <td class=buttonUser for='introduction' usèd>JYP</td>
+                        <td class=buttonUser for='createAccount'>Créer son compte</td>
+                        <td class=buttonUser for='manageAccount'>Gérer son compte</td>
+                        <td class=buttonUser for='switchAccount'>Changer d'utilisateur</td>
+                        <td class=buttonUser for='manageProfile'>Gérer son profile</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="padding: 5vmax; text-align: justify; overflow-y: scroll;" introduction>
+                JYP est un type de fichier crypté utilisé comme base de donnée qui n'utilise cependant pas de serveur.
+                Ainsi l'utilisateur doit le sauvegarder manuellement au risque de perdre les informations sur son compte
+                JYP.
+                Pour se faire, il sufit de cliquer sur l'encadré suivant:
+
+                <div style="display: flex; justify-content: center;">
+                    <button onclick="saveAsJYP(User, User.firstname+`'s account`)" style="cursor: pointer">Sauvegrader
+                        les données</button>
+                </div><br>
+
+                Il est aussi possible de récupérer un fichier JYP, pour ceci, il faut cliquer sur l'encadré suivant:
+                <div style="display: flex; justify-content: center;">
+                    <button onclick="document.querySelector(`input[type='file']`).click();"
+                        style="cursor: pointer">Récupérer les
+                        données</button></div>
+
+            </div>
+            <div style="padding: 5vmax; text-align: justify;display: none; overflow-y: scroll;" createAccount>
+                Créer son compte
+            </div>
+            <div style="padding: 5vmax; text-align: justify;display: none; overflow-y: scroll;" manageAccount>
+                <table>
+                    <tr>
+                        <td style="text-align: left;">
+                            Créer un nouveau mot de passe:</td>
+                        <td>
+                            <input type="password"
+                                onclick="document.querySelectorAll('[focus]').forEach(el => el.removeAttribute('focus'))" /><br>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">
+                            Confirmer le mot de passe:</td>
+                        <td>
+                            <input type="password"
+                                onclick="document.querySelectorAll('[focus]').forEach(el => el.removeAttribute('focus'))" />
+                        </td>
+                    </tr>
+                </table>
+                <br><br>
+                <div style="text-align: right;">
+                    <input type=checkbox /> Protéger mon compte par un mot de passe</div>
+            </div>
+            <div style="padding: 5vmax; text-align: justify;display: none; overflow-y: scroll;" switchAccount>
+                <div style="display: flex; justify-content: center; align-items:center;">
+                    <table>
+                        <tr>
+                            <td><img switchFREEimg onclick="uploadJYP();closeModals()"></td>
+                            <td style="width:5vmin"></td>
+                            <td><img switchUSERimg onclick="User=reset;changeUserData();closeModals()"></td>
+                        </tr>
+                        <tr>
+                            <td>upload</td>
+                            <td></td>
+                            <td>free player</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div style="padding: 5vmax; text-align: justify;display: none; overflow-y: scroll;" manageProfile>
+                <div style="display: flex; justify-content: center; align-items:center;">
+                    <table>
+                        <tr>
+                            <td rowspan=2><img id='profileuploadIMG' /></td>
+                            <td style='font-size: 5vmin; text-align: left; padding-left:2vmin; ' valign=bottom>
+                                <div firstChanging contenteditable spellcheck="false"
+                                    onkeydown="changeName('firstname',event)"
+                                    onclick="document.querySelectorAll('[focus]').forEach(el => el.removeAttribute('focus'))">
+                                    free</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='font-size: 5vmin; text-align: left; padding-left:2vmin;' valign=top>
+                                <div lastChanging contenteditable spellcheck="false"
+                                    onkeydown="changeName('lastname',event)"
+                                    onclick="document.querySelectorAll('[focus]').forEach(el => el.removeAttribute('focus'))">
+                                    player</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="display: none;position: absolute; cursor: none;" id='pencil'>
+                    <svg style="height: 15.23px; width: 18.69px;">
+                        <path style="fill:#000000;stroke-width:0.01946664"
+                            d="m 1,14.23 c 0.01654111,-0.0304 0.64662487,-1.00137 1.40018567,-2.15768 l 1.3701107,-2.1024 3.5603643,-2.71139 c 1.9582007,-1.49127 4.0596848,-3.09153 4.6699658,-3.55615 0.610281,-0.46462 1.643964,-1.25162 2.29707,-1.7489 l 1.187469,-0.90413 0.165467,0.0571 c 0.742892,0.25634 1.315119,0.73488 1.640505,1.37189 0.179956,0.35231 0.313688,0.80634 0.354594,1.20388 0.0066,0.0642 0.01579,0.13522 0.02039,0.15774 0.0068,0.0332 -0.03492,0.0741 -0.220024,0.2157 -0.125615,0.0961 -2.234432,1.6976 -4.686263,3.5589 -2.4518312,1.8613 -4.9440542,3.75331 -5.5382744,4.20448 -0.5942212,0.45116 -1.13018,0.85757 -1.1910198,0.90313 -0.1077691,0.0807 -0.1732121,0.10152 -2.5404042,0.80827 -1.3363823,0.39898 -2.45012987,0.73205 -2.47499525,0.74014 -0.04438994,0.0144 -0.04466438,0.0137 -0.01513436,-0.0406 z m 3.38875897,-1.39017 1.2649455,-0.37309 0.1056691,-0.0901 c 0.1591286,-0.13576 0.3655898,-0.38373 0.4322798,-0.51919 0.047694,-0.0969 0.056704,-0.13443 0.045977,-0.1916 -0.040195,-0.21426 -0.3468357,-0.1988 -0.8723346,0.044 l -0.1710683,0.079 0.103595,-0.11758 c 0.2645645,-0.30026 0.3663563,-0.48685 0.3663796,-0.67158 1.2e-5,-0.0911 -0.01028,-0.1342 -0.044173,-0.18493 -0.1314137,-0.19672 -0.4108291,-0.17814 -0.9255546,0.0616 l -0.1618744,0.0754 0.1736544,-0.18349 c 0.3372895,-0.35639 0.4341757,-0.69387 0.2243705,-0.78153 -0.1712766,-0.0716 -0.6381344,0.0811 -0.8857486,0.28966 -0.07984,0.0673 -1.5198628,2.35005 -1.4994692,2.37705 0.00932,0.0123 0.1189323,0.15128 0.2435733,0.30876 0.2193733,0.27716 0.2283501,0.28575 0.2807267,0.26857 0.029759,-0.01 0.6233318,-0.18564 1.3190517,-0.39084 z m 4.7015972,-2.9746 c 1.4079282,-1.07611 2.9817853,-2.27915 3.4974593,-2.6734 l 0.937589,-0.71684 -0.04814,-0.15674 c -0.08881,-0.28921 -0.164854,-0.46883 -0.19377,-0.45773 -0.02174,0.008 -3.2652249,2.48861 -6.3896616,4.88612 -0.5512492,0.423 -0.6056108,0.46972 -0.5645338,0.48517 0.1347421,0.0507 0.1758118,0.0769 0.2109804,0.13459 0.060636,0.0994 0.046589,0.22861 -0.049063,0.45117 -0.01256,0.0292 -0.010055,0.0337 0.011629,0.0207 0.015203,-0.009 1.1795836,-0.89697 2.5875118,-1.97309 z m -2.696137,0.74385 c 0.2902049,-0.22126 3.1418883,-2.40474 5.8257903,-4.4607 l 0.900717,-0.68999 -0.05212,-0.09 c -0.07392,-0.12758 -0.148748,-0.23267 -0.234536,-0.32938 l -0.07424,-0.0837 -3.5526706,2.70845 c -1.9539701,1.48965 -3.5552437,2.71543 -3.5583869,2.72396 -0.00316,0.009 0.018757,0.0215 0.048667,0.0287 0.1568458,0.0382 0.2896815,0.20009 0.3108551,0.37887 0.00814,0.0687 0.018458,0.0943 0.033386,0.0827 0.011883,-0.009 0.1705276,-0.13025 0.3525417,-0.26902 z m 2.5112037,-3.23733 c 1.905788,-1.45861 3.4803516,-2.66665 3.4990296,-2.68454 0.03204,-0.0307 0.02545,-0.0383 -0.1168,-0.13349 -0.190828,-0.1278 -0.374405,-0.22362 -0.405535,-0.21168 -0.01668,0.007 -6.9831319,5.27843 -7.0509496,5.33597 -0.00314,0.003 0.071316,6.7e-4 0.1654663,-0.004 0.1396023,-0.007 0.1834975,-0.002 0.2379325,0.0267 0.096011,0.0508 0.138077,0.11932 0.1511411,0.24591 0.00798,0.0773 0.017991,0.10575 0.033042,0.0939 0.011879,-0.009 1.5808808,-1.21039 3.4866709,-2.669 z m 7.1588086,-2.84502 c 0.580875,-0.44022 1.071285,-0.81477 1.089802,-0.83233 0.03187,-0.0302 0.03108,-0.0421 -0.01467,-0.22243 -0.07082,-0.2791 -0.116604,-0.4071 -0.231848,-0.64828 -0.145718,-0.30494 -0.278535,-0.49254 -0.515659,-0.72834 -0.217596,-0.21638 -0.374988,-0.3314 -0.651203,-0.47588 l -0.168958,-0.0884 -1.074996,0.80962 c -0.591249,0.44529 -1.077414,0.81609 -1.080367,0.82401 -0.003,0.008 0.05837,0.0522 0.136267,0.0985 0.695091,0.41304 1.18038,1.06447 1.390638,1.86675 0.02841,0.10842 0.05463,0.19713 0.05826,0.19713 0.0036,0 0.481861,-0.36018 1.062735,-0.80041 z" />
+                    </svg>
+                </div>
+                <script>
+                    var pencil = document.querySelector('#pencil'),
+                        profileuploadIMG = document.querySelector('#profileuploadIMG');
+                    profileuploadIMG.onmousemove = () => {
+                        pencil.show();
+                        var rect = profileuploadIMG.getBoundingClientRect();
+                        var center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+                            radius = rect.height / 2 || rect.width / 2;
+                        document.onmousemove = e => {
+                            pencil.style.left = (e.x - .1 * window.innerWidth - 5) + 'px';
+                            pencil.style.top = (e.y - .1 * window.innerHeight - pencil.offsetHeight + 5) + 'px';
+                            if (Math.sqrt((e.x - center.x) ** 2 + (e.y - center.y) ** 2) > radius) stopPencil();
+                        }
+                        document.onclick = e => {
+                            uploadIMG()
+                        }
+                    }
+                    stopPencil = () => {
+                        pencil.hide();
+                        document.onmousemove = e => { }
+                        document.onclick = e => { }
+                    }
+
+                    changeName = (tag, e) => {
+                        setTimeout(() => {
+                            User[tag] = e.target.innerText;
+                            Change.firstname.innerText = User.firstname;
+                            Change.lastname.innerText = User.lastname;
+                            saveToLocal(User)
+                        }, 100)
+                    }
+                </script>
+            </div>
+            <script>
+                var chooser = document.querySelector('[chooser]');
+                for (Crow of chooser.rows) for (Ccol of Crow.cells) Ccol.onclick = e => {
+                    usèd = document.querySelector('[usèd]')
+                    usèd.removeAttribute('usèd');
+                    document.querySelector('[' + usèd.getAttribute('for') + ']').hide()
+                    e.target.toggleAttribute('usèd');
+                    document.querySelector('[' + e.target.getAttribute('for') + ']').style.display = "inherit";
+                }
+            </script>
+            <div remove onclick="closeModals()">&times;</div>
+        </div>
+    </div>
+    <script>
+        var Change = {
+            firstname: document.querySelector('#firstname'),
+            lastname: document.querySelector('#lastname'),
+            image: document.querySelector('img[profileIMG]'),
+            uploadimage: document.querySelector('img#profileuploadIMG'),
+            switchimageFREE: document.querySelector('[switchFREEimg]'),
+            switchimageUSER: document.querySelector('[switchUSERimg]'),
+            score: document.querySelector('span[score]'),
+            firstChange: document.querySelector('[firstChanging]'),
+            lastChange: document.querySelector('[lastChanging]'),
+        }
+        var User = reset = {
+            firstname: 'free',
+            lastname: 'player',
+            birthday: {
+                year: '',
+                month: '',
+                day: '',
+            },
+            profile: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAb1BMVEX8/PxSUlL///9PT09LS0tAQEBERERGRkZFRUVMTEw+Pj7z8/Pw8PA7OzvFxcXh4eFoaGjV1dW/v79VVVWtra3q6uqdnZ2RkZGEhIRbW1u0tLTLy8umpqZzc3Pe3t5jY2N4eHiLi4uPj49+fn4kJCQSYEkLAAAKKUlEQVR4nO1daZeiPBOVSgBBcUHFdutux/f//8YXdFxYTS1B5jm5n/rMOUNyraRSW1KjkYODg4ODg4ODGKCCT89HDHc+k/lyuUz3VxzyPzeT/wDTK4H5YZ19rbzQD3KEN4zzP31fqcXlmB6m/ybPYtKTw/rLi4Ox1pHyGqEiHY79ZJGl3/8Wy0Jy6XYVj3XUzKxKVIdBsDgeRv8Ey0J2s23oh7pFbu00x/5ivRw6SYDN+pSEGkfuhWXgnw/DJZlLb72IsbKrIgrCYZLM5zT79UMmvTtJvZ0PjGO+OrNgLELvBu3/zEbDIQmw/I2pe68NaqyzzTA4AqS7QFB8T2j/PACOOb+V5PIsI4pP35/lWPCzI787VPz7QaVjV353RMVa/RDB74Vd+d2h/ewTYoTJV9wLvytHPeubI8A+kD4fOhGcpr1ShPki6JNfDpUc+xMjwDHpbYE+Ee7mPVGE6U/YPz+vODn6ESOknxDgDeHC/m4EuPS9A1+hxjPLFGHu9apC6/C3VlcqpP7HVugd4W5ijSLA1v80P6+IdSwtUYTJ6TM6tIZ4b4UiTFdmwcEekBuqFgjOmVtQRVqHYXiLfLdHic0QnEfSHOHA8JOUDv1kd8myNE2X8/ksTbPssosDdFD1iXAhrFJhllDnEoX+IjtsqqmnfILzdLsjh+f0QlSKZILRWG9nk5akRPHPm/2JGMSKIkH7hkpQJ5fZm+BuQfIYkgSplBhFIkEdbKcmmwWo0RAxijSCUZyZh3SLiCThrFWRiHlDIqj8L9zvC7AmuCyRhEaFA4Gg9g7ooWG6GOMHWvAJzvHDesEXZfUUYsRT/GIKESYESyahmo3wjQ/fjbc8iuChh1T+N3lMmOBtX3/NoQgn9GnMU+G5/4IeMTnQB4QMrcK5ZxTACS3FMTnqD7O4b4LFqCvsxlA/1KE2aIJewrcyYLLDUiQrVPRIXiIRX4A5OpoXkLQ3/EHvedpA9ZFTdDgoIYTDYYYeRl+EbH38j6t2+KEneFsmmsgQpGgbjT744Rd/9DLOperoS7SSi5EqAFL0bo9+BaMK8IX9gZXC+TITfHIiFs22T/BaALVO4YJeo1o2hAkZ3npDrFM44KP3viS/EUWIKH2K9yiERUgSYmjsZcARHzPxxWteJnh3ODC0GWGKt0cjqcP+ZRpodepFhvYpQc14gdxZ+JjGgaDPjYw3mONF6GkbuSB8LFwtjBgu8JEZvM1kMpEtnqJvcGLAkpDnDWxkZWGJX6YmQqSI0EvspJ0JVR9B+m4qJBFGZztZZ7w29dTqLUOKCM2PWhzDPSGX8W7DwDel2iKgR0i7J0NYpu92IuUszDWYreoPStKrW51SwmumpxCF4Q9hy3SbV5QjKP/mH1sMSdPpjmiSSoIsKZqc4ZrCsMvNgZTG0Fa9IMxo8+lgSFn31lQpKTZ8Zdh66tOOilx7iUURqxOakiakTq0M8W61XYajEUW1d+gaIJYehtYIjoh1PC2qj+Jy3mCvopWmGNqMU9hSqyuHxtDzm319gk89VIb62FhHR16kw2PYHDqlatIhMmwObgK9QnZ4DMOGXC3M6XX4w2OoGhJhJId6sAybzmg4kVdpZO8SC1n5NQUz6CIcnNXmNZ0XpJiIdYZAZliPO3C2YWDr5iPRe7qiFsKlxCYfDK3dQyJEvR+Tqjqt+PqOJ5oOHxmGtJhD86RovuYN4vnfB0O6mVWLw3PWg3FiEs+QsXXUT4UhKap1/xih5MqMIee+alD51plz8y62Q5C1daqqhpSQeX7MjjKFA+GewAOVGCcpQ/D8mKU7nQxFU7VqYMO64Gsrf8haWOVcA0uVetaST6xJlZUpb8XbqBcSmFSpWBGOvHcErGxE3jasaHhaGuuJJpeaz5B5dbx0XHCMhyukKxNHvLDKjeGrywO/zMcgLDzIwd055QOREWe7wYJpyvF2bgxfk2zAJJhva2k/n5rqe6KUnyGUdVfQnpWkMmQqv4pThy85rkK8HgPYP7owQ+FS/RHMeMe9BYbCBZiM8O0dpWS3AEPZmCKpjNc2Q9GqGvjDfwunxJDlTD8oChKcsvzVG8RlKClErtF9hTzDrlokJCYSD1LZYCglRBER2mDoaSGCImpB/DysfZPBkG2w1WcjxNALJAwbmAsoUq/CkO9b3CBy/Yme2i6jFE5k+4d3mNxZeUdwLfSyX9k/vEhRZF+AYoZuX1BmyI3TPMBXNviXHFpQjtOQi/ZqYK5TOIu9j1qOtXGjPk+8v5bTSRD/YEQryvFSWsl4IziOImxkDoobJPMWJXDeVhDbhLW8hZgCKzCmPlIDF8FHiisBTl7+sAJqVAr2ks9MV7S6QFjkBSFpK8JU9B3tag6YlcevwadET0FwE3r1PD6nFqMBCd4Ehz07flhCtRZDUpl6tAIUuzOQVaY5Qqz1Rnmqogu12gJ2pqcKdPhU+Ln+Wlpazvb+C6QJzinSa0StxkfMK3sA+aqR9C+c1EZg1Ag3w0dZNiCsBxqsDurFtVbg7l3KhNeeaLgXxE7lV4FiKK7Lx3XzX3yrJxhlKs6woTiEnzcvo1rB+o6ipOnfclFW+ER8/8hIeXRWlV4NjUVaQpHmv9DIKinCQ5RdaLxiKWqahq3XqVspngUN75YtwqqqLiGi9BCBLT+xfUfLVWeJzHKBKL6QLtHATEv9xi0PbossUxUmf6hNJ2GUJSIcW303/jLV/s+e0+QWpltfgGPbfXxu6lWFwZbbFxVgmgXsvsmt1Uusik4VrFjie3KEGbP3dfu7GIzMnfIXcn00i8YsXkBXex3FrtRLiMo/LUWbE+WCPJzJqzXomgplmebyk+X3l+SI2Gu4M7pA0DUqEJbfK8nDL0G1dkYy8bom2NnsYwswRx8fb2oJkOGSUKeWO4Pmx8cR15f3TYoW9Wyi9vvofJoPcRyba8C3aSFzP03FW3vNJCuTGpnLMXh3L8JUiPkB0Wc/cGOOBukEszxb+GNLgbbOa5T5BjrirQjNhBiN1x9odg6by9tmSUYZobdCVDGy45gUAJbvurMZiLAIunX72uGq7wX6Mjc4dnbY6rC5S5/pOhNVkn2M33Vym67ubIblSl0FrHpn641EUwCsW8VofL+svZFVbLdltOH0WjtnI8Lszb0RlLbd9tsMbd3Pw8ZX2po/0Rie1RYbYiMBx4YkAKqirunB5OA8gBV6R1PfSVRVZEPxjm++BPoALKuhHI179qDWKygZxhZ8AjYVdYi9ClHp9zQ4grVKTWy/pxGUmqDEwyNYsaCRa/T6/1/6Bfm2HoLiAfaPKZIqk58V17RSwx7wTHlSeuc9awUNzdlP4D5FYltC2Nz0afwZX8kE8H3VFuS2hLc+pGPpm/aSuK5TRX98szDBrT3kJYPiLian+SmctLUnA2UAmWY2P90NW4S5EP/HO8pgM+RdWAC4ExyQP9GCwU/QwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHB4Yn/A5+anJJMb8/hAAAAAElFTkSuQmCC',
+            username: 'FreePlayer',
+            password: 'FreePlayer',
+            isPasswordProtected: false,
+            Tectonics: {
+                score: 0,
+                bestTimes: {
+                    'grid_2x2|4': '',
+                    'grid_3x3|4': '',
+                    'grid_4x4|4': '',
+                    'grid_4x4|5': '',
+                    'grid_4x4|6': '',
+                    'grid_5x5|4': '',
+                    'grid_5x5|5': '',
+                    'grid_5x5|6': '',
+                    'grid_6x6|5': '',
+                    'grid_6x6|6': '',
+                    'grid_6x6|7': '',
+                    'grid_7x7|6': '',
+                    'grid_7x7|7': '',
+                },
+                means: {
+                    best: 0,
+                    all: 0,
+                    score: 0,
+                },
+                currentGrid: {
+                    answer: {},
+                    player: {},
+                },
+                numberOfGames: 0,
+            }
+        }
+        Change.switchimageFREE.src = Change.switchimageUSER.src = User.profile;
+        var changeUserData = () => {
+            Change.firstname.innerHTML = Change.firstChange.innerHTML = User.firstname;
+            Change.lastname.innerHTML = Change.lastChange.innerHTML = User.lastname;
+            Change.image.src = Change.uploadimage.src = User.profile;
+            Change.score.innerHTML = User.Tectonics.score;
+        }
+
+        var store = localStorage.getItem('JYP');
+        console.log(store)
+        if (store != null) {
+            var objGameInfo = JSON.parse(store)
+            if (!User.Tectonics)
+                objGameInfo.Tectonics = User.Tectonics;
+            User = objGameInfo;
+        }
+        changeUserData()
+        console.log(User)
+
+        saveToLocal = dataObj => {
+            var dataJson = JSON.stringify(dataObj);
+            localStorage.setItem('JYP', dataJson);
+        }
+        saveToLocal(User)
+
+        saveAsJYP = (dataObj, name) => {
+            var dataJson = JSON.stringify(dataObj);
+            var link = document.createElement("a");
+            link.setAttribute("href", "data:text/plain;charset=utf-8," + dataJson.encodeJL());
+            link.setAttribute("download", name + ".jyp");
+            link.click();
+        }
+
+        uploadJYP = () => {
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.jyp';
+            input.onchange = () => {
+                var file = input.files[0];
+                var reader = new FileReader();
+                reader.readAsBinaryString(file);
+                reader.onloadend = function () {
+                    var dataJson = decodeURIComponent(escape(reader.result)).decodeJL();
+                    var dataObj = JSON.parse(dataJson);
+                    console.log(dataObj)
+                    User = dataObj;
+                    changeUserData()
+                    saveToLocal(User)
+                    if (User.isPasswordProtected && User.isPasswordProtected == 'true') passwordPreventOpen(User.password)
+                }
+            }
+            input.click()
+        }
+
+        uploadIMG = () => {
+            var input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click()
+            input.onchange = () => {
+                var file = input.files[0];
+                console.log(file)
+                var reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = () => {
+                    var rep = reader.result;
+                    Change.image.src = Change.uploadimage.src = User.profile = rep;
+                    saveToLocal(User)
+                }
+            }
+        }
+
+        passwordPreventOpen = password => {
+            openModal('pass');
+        }
+    </script>
+    <script>
+        var lines = 5, columns = 5, tectonic = document.querySelector('table[tectonic]');
+        function createTableThrough(table, l, c) {
+            var str = "";
+            for (y = 0; y < l; y++) {
+                str += '<tr>';
+                for (x = 0; x < c; x++) {
+                    str += '<td></td>';
+                }
+                str += '</tr>';
+            }
+            table.innerHTML = str;
+            table.l = { x: table.rows[0].cells.length, y: table.rows.length };
+            return table;
+        }
+        var table = createTableThrough(tectonic, lines, columns);
+        table.cellToElmnt = ᶜ => { return table.rows[ᶜ.y].cells[ᶜ.x] };
+        table.max = 5;
+        table.blocks = [];
+        table.resetTo0Max = () => { ｏ = {}; for (ａ = table.max; ａ > 0; ａ -= 1) { ｏ[ａ] = 0 } return ｏ };
+        table.cellsToUntaken = () => { for (ｙ = 0; ｙ < table.l.y; ｙ++) { for (ｘ = 0; ｘ < table.l.y; ｘ++) { table.cellToElmnt({ x: ｘ, y: ｙ }).setAttribute('taken', false) } } };
+        table.shape = {}; TShapeRestall = () => { for (i = 0; i < lines; i++) { for (j = 0; j < columns; j++) { table.shape[i + ',' + j] = 0 } } }
+        findNumFromRand = random => { nA = 0; for (nB = 1; nB < table.max + 1; nB++) { nA += nB; if (random <= nA) { return nB } } }
+        findNumMAX = () => { nR = 0; for (n1 = 1; n1 < table.max + 1; n1++) { nR += n1 } return nR }
+        createARRToNum = n => { var arr = []; for (n1 = 1; n1 < n + 1; n1++) { arr[n1 - 1] = n1 } return arr }
+        table.number = {}; TNumRestall = () => { for (i = -1; i < lines + 1; i++) { for (j = -1; j < columns + 1; j++) { table.number[i + ',' + j] = { N: undefined, possibilities: /*createARRToMax()*/[] } } } }
+        tectonic.wasManuallyPaused = false;
+
+        table.number.check = () => {
+            for (x = 0; x < table.l.x; x++) {
+                for (y = 0; y < table.l.y; y++) {
+                    if (table.number[x + ',' + y].N == undefined) { return false }
+                }
+            } return true
+        }
+        table.number.casesNEquals = (cells, n) => {
+            for (cell of cells) {
+                if (table.number[cell.cellToString()].N == n) { return true }
+            } return false
+        }
+        table.number.casesPContains = (cells, n) => {
+            var rarr = []
+
+            for (cell of cells) {
+                if (table.number[cell.cellToString()].possibilities.includes(n)) { rarr.push(cell) }
+            } return rarr
+        }
+        table.number.findPoss = () => {
+            for (n = 2; n < table.max + 1; n++) {
+                arrCells = []
+                for (block of table.blocks) {
+                    for (cell of block.cells) {
+                        if (table.number[cell.cellToString()].possibilities.includes(n)) {
+                            arrCells.push(cell)
+                        }
+                    }
+                }
+
+                if (arrCells.length != 0) {
+
+                    return [arrCells[Math.floor(Math.random() * arrCells.length)], n]
+                }
+
+            } return false
+        }
+        table.number.removePossNextTo = (cell, cells, n) => {
+            for (cell1 of cells) {
+                if (cell1.x != cell.x || cell1.y != cell.y) {
+                    table.number[cell1.cellToString()].possibilities.removeItem(n);
+                }
+            }
+            var voisines = cell.casesVoisines(cells)
+            for (ca of voisines) {
+                table.number[ca.cellToString()].possibilities.removeItem(n);
+            }
+        }
+        table.numberKeep = {};
+        Object.defineProperties(Array.prototype, {
+            removeItem: {
+                value: function (value) {
+                    var index = this.indexOf(value);
+                    if (index > -1) { this.splice(index, 1) }
+                }
+            },
+            keepCellsExpNtimes: {
+                value: function (n) {
+                    obje = {};
+                    for (ce of this) {
+                        if (obje[ce.cellToString()] == undefined) {
+                            obje[ce.cellToString()] = 0;
+                        } else {
+                            obje[ce.cellToString()]++
+                        }
+                    }
+                    for (e = this.length - 1; e >= 0; e -= 1) { this.removeItem(this[e]) }
+                    for (ae in obje) {
+                        if (obje[ae] == n - 1) {
+                            this.push(ae.stringToCell())
+                        }
+                    }
+                    return this;
+                }
+            },
+            keepItemsExpNtimes: {
+                value: function (n) {
+                    obje = {};
+                    for (ce of this) {
+                        if (obje[ce] == undefined) {
+                            obje[ce] = 0;
+                        } else {
+                            obje[ce]++
+                        }
+                    }
+                    for (e = this.length - 1; e >= 0; e -= 1) { this.removeItem(this[e]) }
+                    for (ae in obje) {
+                        if (obje[ae] == n - 1) {
+                            this.push(ae)
+                        }
+                    }
+                    return this;
+                }
+            },
+            keepCellsPEqualsExpNtimes: {
+                value: function (n) {
+                    objen = {};
+                    nearr = []
+                    for (ce of this) {
+                        nearr.push(table.number[ce.cellToString()].possibilities.toString())
+                        if (objen[table.number[ce.cellToString()].possibilities.toString()] == undefined) {
+                            objen[table.number[ce.cellToString()].possibilities.toString()] = [ce];
+                        } else { objen[table.number[ce.cellToString()].possibilities.toString()].push(ce) }
+                    }
+                    narre = nearr.keepItemsExpNtimes(n)
+                    for (ae in objen) {
+                        if (!narre.includes(ae)) {
+                            objen[ae] = undefined
+                        }
+                    }
+                    return objen;
+                }
+            },
+            casesPlEquals: {
+                value: function (n) {
+                    rarr = []
+                    for (cell of this) {
+                        if (cell.casePlEquals(n)) {
+                            rarr.push(cell)
+                        }
+                    }
+                    return rarr
+                }
+            },
+        });
+        Object.defineProperties(Object.prototype, {
+            toArray: {
+                value: function (value) {
+                    arr = [];
+                    for (a1 = 1; a1 < table.max + 1; a1++) {
+                        for (a2 = 0; a2 < this[a1]; a2++) {
+                            arr[arr.length] = a1
+                        }
+                    }
+                    return arr
+                }
+            },
+            cellToString: { value: function () { return this.x + ',' + this.y } },
+            casesVoisines: {
+                value: function (cells) {
+                    rarr = []
+                    for (i = -1; i < 2; i++) {
+                        for (j = -1; j < 2; j++) {
+                            if (i + this.x >= 0 && i + this.x < table.l.x && j + this.y >= 0 && j + this.y < table.l.y) {
+                                rarr.push({ x: i + this.x, y: j + this.y })
+                            }
+                        }
+                    }
+                    for (cell1 of cells) {
+                        var co = 0;
+                        for (cell2 of rarr) {
+                            if (cell1.x == cell2.x && cell1.y == cell2.y) {
+                                rarr.splice(co, 1)
+                            }
+                            co++
+                        }
+                    }
+                    return rarr
+                }
+            },
+            casePlEquals: {
+                value: function (n) {
+                    return table.number[this.cellToString()].possibilities.length == n
+                }
+            },
+            convertToSeconds: {
+                value: function () {
+                    timeCount = { days: 10 ** 9, hours: 24, minutes: 60, seconds: 60, milliseconds: 1000 }
+                    var Add1 = (((this.days * 24 + this.hours) * 60 + this.minutes) * 60 + this.seconds) + this.milliseconds / 1000;
+                    if (!Add1) console.error(this + ' is not a valid time');
+                    return Add1
+                }
+            },
+        });
+        Object.defineProperties(String.prototype, {
+            stringToCell: {
+                value: function (value) {
+                    arr = this.split(',')
+                    return { x: Number(arr[0]), y: Number(arr[1]) }
+                }
+            },
+        });
+        Object.defineProperties(Element.prototype, {
+            show: { value: function () { this.style.display = 'unset' } },
+            hide: { value: function () { this.style.display = 'none' } },
+            isHidden: { value: function () { return this.style.display == 'none' } },
+            Blur: {
+                value: function (blur) {
+                    var filter = this.style.filter;
+                    if (filter == '') {
+                        this.style.filter = 'blur(' + blur + 'px)';
+                    } else if (!filter.includes('blur')) {
+                        this.style.filter += 'blur(' + blur + 'px)';
+                    } else {
+                        var fil_ter = filter.split('blur(');
+                        var f_i_l_t_e_r = fil_ter[1].split('px)');
+                        f_i_l_t_e_r.splice(0, 1);
+                        var result = fil_ter[0] + 'blur(' + blur;
+                        for (f of f_i_l_t_e_r) {
+                            result += 'px)' + f;
+                        }
+                        this.style.filter = result;
+                    }
+                }
+            },
+            isBlurry: {
+                value: function () {
+                    var filter = this.style.filter;
+                    if (!filter.includes('blur'))
+                        return false
+                    else {
+                        var fil_ter = filter.split('blur(');
+                        var f_i_l_t_e_r = fil_ter[1].split('px)');
+                        if (Number(f_i_l_t_e_r[0]) == 0) return false
+                        else return true
+                    }
+                }
+            },
+        });
+
+
+
+        findUntakenCellsNextTo = cell => {
+            var cells = [], y = cell.y, x = cell.x;
+            if (table.shape[(x - 1) + ',' + y] == 0) {
+                cells[cells.length] = { x: x - 1, y: y }
+            }
+            if (table.shape[(x + 1) + ',' + y] == 0) {
+                cells[cells.length] = { x: x + 1, y: y }
+            }
+            if (table.shape[x + ',' + (y - 1)] == 0) {
+                cells[cells.length] = { x: x, y: y - 1 }
+            }
+            if (table.shape[x + ',' + (y + 1)] == 0) {
+                cells[cells.length] = { x: x, y: y + 1 }
+            } return cells;
+        }
+
+        fetchShapes = (l, c) => {
+            var number = 0, result = table.resetTo0Max();
+            while (true) {
+                var rand = Math.floor(Math.random() * findNumMAX());
+                n = findNumFromRand(rand);
+                result[n]++;
+                number += n;
+                if (number == l * c && result[1] <= table.l.x * table.l.y / 25) { return result } else if (number > l * c) { number = 0; result = table.resetTo0Max() };
+            }
+        }
+
+        defineBlocks = blockNums => {
+            TShapeRestall();
+            table.cellsToUntaken();
+            var arr = blockNums.toArray(), blocks = [], nl = table.resetTo0Max();
+
+            for (y = 0; y < table.l.y; y++) {
+                for (x = 0; x < table.l.y; x++) {
+                    if (table.shape[x + ',' + y] == 0) {
+                        var block = { Ncases: arr[Math.floor(Math.random() * arr.length)], cells: [{ x: x, y: y }] };
+                        table.shape[x + ',' + y] = [blocks.length, nl[block.Ncases], block.Ncases];
+                        while (block.cells.length < block.Ncases) {
+                            var retBlock = 1;
+                            var cellsNext = [];
+                            while (cellsNext.length == 0 && retBlock <= block.cells.length) {
+                                var cell = block.cells[block.cells.length - retBlock]
+                                cellsNext = findUntakenCellsNextTo(cell);
+                                retBlock++;
+                            }
+                            if (retBlock > block.cells.length + 1) {
+                                block.Ncases = block.cells.length;
+                                while (block.Ncases > 0 && !arr.includes(block.Ncases)) {
+                                    var cell = block.cells[block.cells.length - 1];
+                                    table.shape[cell.x + ',' + cell.y] = 0;
+                                    block.Ncases -= 1; block.cells.pop();
+                                }
+                                if (block.Ncases == 0) return false;
+                            } else {
+                                var cell = cellsNext[Math.floor(Math.random() * cellsNext.length)]
+                                if (cell == undefined) return false;
+                                block.cells[block.cells.length] = cell;
+                                table.shape[cell.x + ',' + cell.y] = [blocks.length, nl[block.Ncases], block.Ncases];
+                            }
+                        }
+                        arr.removeItem(block.Ncases);
+                        blocks[blocks.length] = block;
+                        nl[block.Ncases]++;
+                    }
+                }
+            }
+            return blocks;
+        }
+
+        generateBlocks = blockNums => {
+            var cont = false;
+            while (cont == false) {
+                cont = defineBlocks(blockNums)
+            }
+            return cont
+        }
+
+        drawBlocks = blocks => {
+            for (b = 0; b < blocks.length; b++) {
+                var block = blocks[b];
+                for (n = 0; n < block.Ncases; n++) {
+                    var cell = block.cells[n];
+                    var arrCell = ['up', 'down', 'left', 'right'];
+                    var all = ['up', 'down', 'left', 'right'];
+                    var objCell = { '0,-1': 'up', '0,1': 'down', '-1,0': 'left', '1,0': 'right' };
+                    for (c = 0; c < block.Ncases; c++) {
+                        var cell2 = block.cells[c];
+                        var str = (cell2.x - cell.x) + ',' + (cell2.y - cell.y);
+                        arrCell.removeItem(objCell[str]);
+                    }
+                    var elmnt = table.cellToElmnt(cell);
+
+                    for (a of all) {
+                        elmnt.removeAttribute(a);
+                    }
+                    for (a of arrCell) {
+                        elmnt.toggleAttribute(a);
+                    }
+                    elmnt.setAttribute('block', b);
+                }
+            }
+        }
+
+        createBlocks = () => {
+            table.blockNums = fetchShapes(lines, columns);
+            table.blocks = generateBlocks(table.blockNums)
+        }
+
+        addNumbers = (blocks) => {
+            TNumRestall();
+            for (block of blocks) {
+                for (cell of block.cells) {
+                    table.number[cell.cellToString()].possibilities = createARRToNum(block.Ncases)
+                }
+            }
+            table.numberKeep = {};
+            var change = true;
+            while (change && !table.number.check()) {
+                change = false;
+                for (block of blocks) {
+                    for (n = 1; n < block.Ncases + 1; n++) {
+                        if (!table.number.casesNEquals(block.cells, n)) {
+                            var cellsContain = table.number.casesPContains(block.cells, n);
+                            arr = [];
+                            for (c of cellsContain) {
+                                var plus = c.casesVoisines(block.cells)
+                                for (p of plus) {
+                                    arr.push(p)
+                                }
+                            }
+                            newArr = arr.keepCellsExpNtimes(cellsContain.length)
+                            for (cell of newArr) {
+                                if (cell == undefined) return false;
+                                table.number[cell.cellToString()].possibilities.removeItem(n)
+                            }
+                        }
+                    }
+                }
+                for (block of blocks) {
+                    for (n = 2; n < block.Ncases + 1; n++) {
+                        arr = block.cells.casesPlEquals(n)
+                        arrn = []
+                        for (cell of block.cells) {
+                            arrn.push(table.number[cell.cellToString()].possibilities)
+                        }
+                        obj = arr.keepCellsPEqualsExpNtimes(n)
+                        for (poss in obj) {
+                            if (obj[poss] != undefined) {
+                                for (c of block.cells) {
+                                    var bool = true;
+                                    for (o of obj[poss]) {
+                                        if (o.x == c.x && o.y == c.y) bool = false;
+                                    }
+                                    if (bool) {
+                                        for (nStr of poss.split(',')) {
+                                            table.number[c.cellToString()].possibilities.removeItem(Number(nStr))
+                                        }
+                                    }
+                                }
+                                narr = []
+                                for (c of obj[poss]) {
+                                    var plus = c.casesVoisines(block.cells)
+                                    for (p of plus) {
+                                        arr.push(p)
+                                    }
+                                }
+                                newArr = arr.keepCellsExpNtimes(cellsContain.length)
+                                for (cell of newArr) {
+                                    if (table.number[c.cellToString()] == undefined) return false;
+                                    for (nStr of poss.split(',')) {
+                                        table.number[c.cellToString()].possibilities.removeItem(Number(nStr))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                c1 = true;
+                for (block of blocks) {
+                    var NumArr = {};
+                    for (cell of block.cells) {
+                        for (possibility of table.number[cell.cellToString()].possibilities) {
+                            if (NumArr[possibility] == undefined) {
+                                NumArr[possibility] = [cell]
+                            } else {
+                                NumArr[possibility].push(cell)
+                            }
+                        }
+                    }
+                    for (po in NumArr) {
+                        if (NumArr[po].length == 1 && po != 'done') {
+                            table.number[NumArr[po][0].cellToString()].possibilities = [po]
+                            change = true;
+                        }
+                    }
+                }
+                while (c1) {
+                    c1 = false;
+                    for (block of blocks) {
+                        for (cell of block.cells) {
+                            if (table.number[cell.cellToString()].possibilities.length == 1 && table.number[cell.cellToString()].N == undefined) {
+                                table.number[cell.cellToString()].N = table.number[cell.cellToString()].possibilities[0]
+                                table.number[cell.cellToString()].possibilities = ['done']
+                                change = true; c1 = true;
+                                table.number.removePossNextTo(cell, block.cells, table.number[cell.cellToString()].N)
+                            } else if (table.number[cell.cellToString()].possibilities.length == 0) return true;
+                        }
+                    }
+                }
+                if (!change) {
+                    ranCellNum = table.number.findPoss();
+                    if (ranCellNum) {
+                        table.number[ranCellNum[0].cellToString()].possibilities = [table.number[ranCellNum[0].cellToString()].possibilities[Math.floor(Math.random() * ranCellNum[1])]];
+                        change = true;
+                        table.numberKeep[ranCellNum[0].cellToString()] = table.number[ranCellNum[0].cellToString()].possibilities[0];
+                    }
+                    c1 = true;
+                    while (c1) {
+                        c1 = false;
+                        for (block of blocks) {
+                            for (cell of block.cells) {
+                                if (table.number[cell.cellToString()].possibilities.length == 1 && table.number[cell.cellToString()].N == undefined) {
+                                    table.number[cell.cellToString()].N = table.number[cell.cellToString()].possibilities[0]
+                                    table.number[cell.cellToString()].possibilities = ['done']
+                                    change = true; c1 = true;
+                                    table.number.removePossNextTo(cell, block.cells, table.number[cell.cellToString()].N)
+                                } else if (table.number[cell.cellToString()].possibilities.length == 0) return true;
+                            }
+                        }
+                    }
+                }
+                addToGrid(table.number)
+            }
+            if (table.number.check()) {
+                return false;
+            }
+            return true
+        }
+
+        addToGrid = number => {
+            for (block of table.blocks) {
+                for (cell of block.cells) {
+                    if (number[cell.cellToString()].N != undefined) {
+                        table.cellToElmnt(cell).setAttribute('edit', false);
+                        table.cellToElmnt(cell).innerHTML = number[cell.cellToString()].N;
+                    } else {
+                        table.cellToElmnt(cell).setAttribute('edit', true);
+                        table.cellToElmnt(cell).innerHTML = '';
+                    }
+                }
+            }
+        };
+
+        keepNumbers = numbers => {
+            TNumRestall()
+            for (n in numbers) {
+                table.number[n].N = numbers[n]
+            }
+            addToGrid(table.number)
+        }
+
+        document.querySelector('[blur]').load = () => {
+            document.querySelector('[loader]').show()
+            document.querySelector('[long]').hide()
+            document.querySelector('[error]').hide()
+        }
+        document.querySelector('[blur]').long = () => {
+            document.querySelector('[loader]').hide()
+            document.querySelector('[long]').show()
+            document.querySelector('[error]').hide()
+        }
+        document.querySelector('[blur]').error = () => {
+            document.querySelector('[loader]').hide()
+            document.querySelector('[long]').hide()
+            document.querySelector('[error]').show()
+        }
+        var oops = { '&': 1, 'é': 2, '"': 3, "'": 4, '(': 5, '-': 6, 'è': 7, '_': 8, 'ç': 9, 'à': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '0': 0 }
+
+        createTectonic = () => {
+            console.log(columns, lines, table.max)
+            table.chrono = new chronometer();
+            table = createTableThrough(tectonic, lines, columns);
+            document.querySelector('header span').innerHTML = 'Tectonics ' + lines + '×' + columns/*+'<span style="font-size: 75%;"> |'+table.max+'</span>'*/;
+            enableClick(table)
+            var Ⰰ = true;
+            document.querySelector('[blur]').show()
+            document.querySelector('[blur]').load();
+            setTimeout(() => {
+                if (!document.querySelector('[blur]').isHidden()) {
+                    document.querySelector('[blur]').long(); return
+                }
+            }, 5000)
+            while (Ⰰ || !table.isGood()[0]) {
+                createBlocks();
+                Ⰰ = addNumbers(table.blocks);
+                if (!Ⰰ) {
+                    addToGrid(table.number);
+                    drawBlocks(table.blocks);
+                }
+            }
+            document.querySelector('[blur]').hide()
+            createImage(table)
+            User.Tectonics.currentGrid.answer = {}
+            for (row = 0; row < table.l.x; row++)for (col = 0; col < table.l.y; col++)
+                User.Tectonics.currentGrid.answer[row + ',' + col] = table.number[row + ',' + col]
+            keepNumbers(table.numberKeep);
+            User.Tectonics.currentGrid.player = {}
+            for (row = 0; row < table.l.x; row++)for (col = 0; col < table.l.y; col++)
+                User.Tectonics.currentGrid.player[row + ',' + col] = table.number[row + ',' + col]
+            table.chrono.reset();
+            table.chrono.start();
+        }
+
+        table.isGood = () => {
+            for (block of table.blocks) {
+                var check1 = []
+                for (cell of block.cells) {
+                    if (check1.includes(table.cellToElmnt(cell).innerText)) {
+                        return [false, cell, block, Number(table.cellToElmnt(cell).innerText)];
+                    } else {
+                        var voisines = cell.casesVoisines(block.cells);
+                        for (v of voisines) {
+                            if (table.cellToElmnt(cell).innerText == table.cellToElmnt(v).innerText) return [false, cell, v, table.cellToElmnt(cell).innerText]
+                        }
+                    }
+                    check1.push(table.cellToElmnt(cell).innerText)
+                }
+            }
+            return [true];
+        }
+
+        createImage = elmnt => {
+            var canvas = document.createElement('canvas');
+            const cX = 50, cY = 50, stroke = 5;
+            canvas.style = 'height: ' + (elmnt.offsetHeight / 50 * cY + stroke) + 'px; width: ' + (elmnt.offsetWidth / 50 * cX + stroke) + 'px;';
+            canvas.height = elmnt.offsetHeight / 50 * cY + stroke;
+            canvas.width = elmnt.offsetWidth / 50 * cX + stroke;
+            var ctx = canvas.getContext('2d');
+            for (x = 0; x < elmnt.l.x; x++) {
+                for (y = 0; y < elmnt.l.y; y++) {
+                    ctx.fillStyle = 'white';
+                    ctx.lineWidth = .25;
+                    ctx.strokeStyle = "grey";
+                    ctx.fillRect(x * cX + stroke / 2, y * cY + stroke / 2, 50, cY)
+                    ctx.strokeRect(x * cX + stroke / 2, y * cY + stroke / 2, 50, cY)
+                    ctx.lineWidth = stroke;
+                    ctx.strokeStyle = "black";
+                    cell = elmnt.rows[y].cells[x];
+                    if (cell.hasAttribute("up")) {
+                        ctx.moveTo(x * cX + stroke / 2, y * cY + stroke / 2);
+                        ctx.lineTo((x + 1) * cX + stroke / 2, y * cY + stroke / 2);
+                        ctx.stroke();
+                    }
+                    if (cell.hasAttribute("down")) {
+                        ctx.moveTo(x * cX + stroke / 2, (y + 1) * cY + stroke / 2);
+                        ctx.lineTo((x + 1) * cX + stroke / 2, (y + 1) * cY + stroke / 2);
+                        ctx.stroke();
+                    }
+                    if (cell.hasAttribute("left")) {
+                        ctx.moveTo(x * cX + stroke / 2, y * cY + stroke / 2);
+                        ctx.lineTo(x * cX + stroke / 2, (y + 1) * cY + stroke / 2);
+                        ctx.stroke();
+                    }
+                    if (cell.hasAttribute("right")) {
+                        ctx.moveTo((x + 1) * cX + stroke / 2, y * cY + stroke / 2);
+                        ctx.lineTo((x + 1) * cX + stroke / 2, (y + 1) * cY + stroke / 2);
+                        ctx.stroke();
+                    }
+                }
+            }
+            var url = canvas.toDataURL('image/png', 1)
+            document.querySelector('#icon1').setAttribute('href', url)
+            document.querySelector('#icon2').setAttribute('href', url)
+        }
+
+        enableClick = table => {
+            var p = { x: 0, y: 0 };
+            for (row of table.rows) {
+                p.y = 0;
+                for (cell of row.cells) {
+                    cell.onclick = e => {
+                        var focuses = document.querySelectorAll('.focus');
+                        for (foc of focuses) {
+                            foc.classList.remove('focus');
+                        }
+                        if (e.target.getAttribute('edit') == 'true') e.target.classList.add('focus');
+                    }
+                    cell.cell = { x: p.y, y: p.x };
+                    cell.popupList = [];
+                    cell.placeholder = []
+                    cell.onkeydown = cell.erase = e => {
+                        console.log(e)
+                        var key = oops[e.key]
+                        if (e.ctrlKey || e.altKey || e.metaKey) {
+                            if (!isNaN(Number(key)) && Number(key) <= table.max) {
+                                var array = e.target.placeholder;
+                                if (array.includes(key)) {
+                                    array.removeItem(key)
+                                } else {
+                                    array.push(key);
+                                }
+                                array.sort((a, b) => a - b);
+                                text = array.toString().replaceAll(',', ' ')
+                                e.target.setAttribute('placeholder', text)
+                                User.Tectonics.currentGrid.player[e.target.cell.cellToString()].possibilities = array;
+                            }
+                        } else {
+                            if (!isNaN(key) || e.key == 'Backspace' || e.key == 'Delete') {
+                                if (e.key == 'Backspace' || e.key == 'Delete') {
+                                    for (el of e.target.popupList) el.remove();
+                                    e.target.innerHTML = ''
+                                    User.Tectonics.currentGrid.player[e.target.cell.cellToString()].N = undefined || '';
+                                } else if (key) {
+                                    e.target.innerHTML = key;
+                                    for (el of e.target.popupList) el.remove();
+                                    e.target.innerHTML = key
+                                    console.log(e.target.cell)
+                                    console.log(e.target.cell.cellToString())
+                                    console.log(User.Tectonics.currentGrid.player)
+                                    User.Tectonics.currentGrid.player[e.target.cell.cellToString()].N = key;
+                                }
+                                e.target.placeholder = [];
+                                User.Tectonics.currentGrid.player[e.target.cell.cellToString()].possibilities = [];
+                                e.target.setAttribute('placeholder', '');
+                                var blockNumber = Number(e.target.getAttribute('block'))
+                                var block = table.blocks[blockNumber];
+                                for (cell of block.cells) {
+                                    if ((cell.x != e.target.cell.x || cell.y != e.target.cell.y) && Number(table.cellToElmnt(cell).innerHTML) == key) {
+                                        e.target.issueCell = cell;
+                                        dateString = getDateString();
+                                        table.cellToElmnt(cell).dateString = e.target.dateString = dateString;
+                                        table.cellToElmnt(cell).setAttribute('date', dateString);
+                                        e.target.setAttribute('date', dateString);
+                                        addPopup({
+                                            def: 'Erreur',
+                                            message: 'Deux mêmes nombres ' + key + ' sur le même bloque:<br>(' + cell.x + ',' + cell.y + ') et (' + e.target.cell.x + ',' + e.target.cell.y + ')',
+                                            type: 'error',
+                                            MouseOver: () => {
+                                                table.cellToElmnt(e.target.issueCell).toggleAttribute('errorBackground');
+                                                e.target.toggleAttribute('errorBackground');
+                                            },
+                                            MouseOut: () => {
+                                                table.cellToElmnt(e.target.issueCell).removeAttribute('errorBackground');
+                                                e.target.removeAttribute('errorBackground');
+                                            },
+                                            Click: () => {
+                                                table.cellToElmnt(e.target.issueCell).removeAttribute('errorBackground');
+                                                e.target.removeAttribute('errorBackground');
+                                                e.target.innerHTML = '';
+                                                e.target.erase({ key: 'Backspace', target: e.target })
+                                            },
+                                            date: dateString,
+                                            cell1: e.target,
+                                            cell2: table.cellToElmnt(e.target.issueCell),
+                                        });
+                                    }
+                                    table.cellToElmnt(cell).placeholder.removeItem(key);
+                                    text = table.cellToElmnt(cell).placeholder.toString().replaceAll(',', ' ')
+                                    table.cellToElmnt(cell).setAttribute('placeholder', text)
+                                }
+                                var cells = e.target.cell.casesVoisines(block.cells)
+                                for (cell of cells) {
+                                    if (Number(table.cellToElmnt(cell).innerHTML) == key) {
+                                        e.target.cellIssue = cell;
+                                        dateString = getDateString();
+                                        table.cellToElmnt(cell).dateString = e.target.dateString = dateString;
+                                        table.cellToElmnt(cell).setAttribute('date', dateString);
+                                        e.target.setAttribute('date', dateString);
+                                        addPopup({
+                                            def: 'Erreur',
+                                            message: 'Deux mêmes nombres ' + key + ' juxtaposés:<br>(' + cell.x + ',' + cell.y + ') et (' + e.target.cell.x + ',' + e.target.cell.y + ')',
+                                            type: 'error',
+                                            MouseOver: () => {
+                                                table.cellToElmnt(e.target.cellIssue).toggleAttribute('errorBackground');
+                                                e.target.toggleAttribute('errorBackground');
+                                            },
+                                            MouseOut: () => {
+                                                table.cellToElmnt(e.target.cellIssue).removeAttribute('errorBackground');
+                                                e.target.removeAttribute('errorBackground');
+                                            },
+                                            Click: () => {
+                                                table.cellToElmnt(e.target.cellIssue).removeAttribute('errorBackground');
+                                                e.target.removeAttribute('errorBackground');
+                                                e.target.innerHTML = '';
+                                                e.target.erase({ key: 'Backspace', target: e.target })
+                                            },
+                                            date: dateString,
+                                            cell1: e.target,
+                                            cell2: table.cellToElmnt(e.target.cellIssue),
+                                        });
+                                    }
+                                    table.cellToElmnt(cell).placeholder.removeItem(key);
+                                    text = table.cellToElmnt(cell).placeholder.toString().replaceAll(',', ' ')
+                                    table.cellToElmnt(cell).setAttribute('placeholder', text)
+                                }
+                                if (key > block.Ncases) {
+                                    dateString = getDateString(); e.target.dateString = dateString;
+                                    e.target.setAttribute('date', dateString);
+                                    addPopup({
+                                        def: 'Attention',
+                                        message: key + ' est plus grand que le nombre de cases de son bloque:<br>(' + e.target.cell.x + ',' + e.target.cell.y + ')',
+                                        type: 'warn',
+                                        MouseOver: () => {
+                                            e.target.toggleAttribute('warnBackground');
+                                        },
+                                        MouseOut: () => {
+                                            e.target.removeAttribute('warnBackground');
+                                        },
+                                        Click: () => {
+                                            e.target.removeAttribute('warnBackground');
+                                            e.target.innerHTML = '';
+                                            e.target.erase({ key: 'Backspace', target: e.target })
+                                        },
+                                        date: dateString,
+                                        cell1: e.target,
+                                    });
+                                }
+                                table.cellToElmnt(cell).placeholder.removeItem(key);
+                                text = table.cellToElmnt(cell).placeholder.toString().replaceAll(',', ' ')
+                                table.cellToElmnt(cell).setAttribute('placeholder', text)
+                            }
+                        }
+                        saveToLocal(User)
+                        setTimeout(() => {
+                            if (table.everyCasesAnswered()) {
+                                if (table.isGood()[0]) {
+                                    var t = table.chrono.stop();
+                                    alert('Well done!\nYou took ' + t.days + 'd, ' + t.hours + 'h, ' + t.minutes + 'min, ' + t.seconds + 's, ' + t.milliseconds + 'ms to complete this puzzle')
+                                    GameEnd(t)
+                                }
+                            }
+                        }, 10)
+                    }
+                    p.y++
+                }
+                p.x++
+            }
+        }
+
+        table.everyCasesAnswered = () => {
+            for (block of table.blocks) {
+                for (cell of block.cells) {
+                    if (table.cellToElmnt(cell).innerHTML == '') return false;
+                }
+            }
+            return true;
+        }
+
+        pause = (e, man) => {
+            if (e.innerHTML.includes('Pause')) {
+                table.chrono.pauseStart();
+                table.Blur(5);
+                e.innerHTML = 'Resume'
+                document.querySelector('[for=settings]').children[0].innerHTML = 'Resume';
+                tectonic.wasManuallyPaused = Boolean(man)
+            } else if (!tectonic.wasManuallyPaused || man) {
+                table.chrono.pauseEnd();
+                table.Blur(0);
+                e.innerHTML = 'Pause';
+                document.querySelector('[for=settings]').children[0].innerHTML = 'Pause';
+                tectonic.wasManuallyPaused = false;
+            }
+        }
+
+        var displaysChange = { 'grilles': document.querySelector('textbox[grid]'), 'account': document.querySelector('textbox[account]') };
+        display = (s, elmnt) => {
+            console.log(s, elmnt)
+            for (s1 in displaysChange) displaysChange[s1].hide();
+            displaysChange[s].show();
+            displaysChange[s].style.top = elmnt.offsetTop + elmnt.offsetHeight + 'px';
+            displaysChange[s].style.left = elmnt.parentElement.offsetLeft - displaysChange[s].offsetWidth + 'px';
+            // console.log(displaysChange[s])
+        }
+
+        var modals = { 'règles': document.querySelector("[modal_for='rules'"), 'grilles': document.querySelector("[modal_for='grid'"), 'account': document.querySelector("[modal_for='account'"), 'pass': document.querySelector("[modal_for='pass'") };
+        openModal = (s, t) => {
+            modals[s].setAttribute('open', true);
+            modals[s].style.left = '100vw';
+            document.querySelector('[ModAllWrap]').show();
+            if (!tectonic.isBlurry()) pause(document.querySelectorAll('[option]')[0])
+            if (t) document.querySelector('[for="' + t + '"]').click()
+        }
+        closeModals = () => {
+            var openeds = document.querySelectorAll('[type="modal"][open="true"]')
+            for (ope of openeds) ope.setAttribute('open', false);
+            document.querySelector('[ModAllWrap]').hide();
+            if (tectonic.isBlurry()) pause(document.querySelectorAll('[option]')[0])
+        }
+
+        tecChange = (l, c, m) => {
+            lines = l;
+            columns = c;
+            table.max = m;
+            closeModals();
+            createTectonic();
+        }
+
+        GameEnd = t => {
+            var cAll = table.l.x * table.l.y;
+            var cFound = cAll - document.querySelectorAll("[edit='false'").length;
+            var seconds = t.convertToSeconds();
+            var Pscore = Math.floor(cFound ** 2 / cAll * 15 / seconds + cFound);
+            console.log(cAll, cFound, seconds, Pscore)
+            Change.score.innerHTML = User.Tectonics.score += Pscore;
+            saveToLocal(User)
+            createTectonic();
+        }
+    </script>
+    <script>
+        getDateString = () => {
+            var date = new Date();
+            var year = date.getFullYear(), month = date.getMonth(), day = date.getDay(), hour = date.getHours(), minute = date.getMinutes(), second = date.getSeconds(), millisecond = date.getMilliseconds();
+            return year + '/' + month + '/' + day + '/' + hour + '/' + minute + '/' + second + '/' + millisecond;
+        }
+        getDateObj = () => {
+            var date = new Date();
+            return { years: date.getFullYear(), months: date.getMonth(), days: date.getDay(), hours: date.getHours(), minutes: date.getMinutes(), seconds: date.getSeconds(), milliseconds: date.getMilliseconds() }
+        }
+        function Popup(def, message, type, MouseOver, MouseOut, Click, date, cell1, cell2) {
+            this.element = document.createElement('div');
+            this.element.toggleAttribute('popup');
+            this.element.setAttribute('type', type);
+            this.element.setAttribute('popupDate', date);
+            this.HTML = {
+                def: document.createElement('div'),
+                message: document.createElement('div')
+            };
+            this.HTML.def.toggleAttribute('popupDefMessage');
+            this.HTML.message.toggleAttribute('popupMessage');
+            this.HTML.def.innerHTML = def + ':';
+            this.HTML.message.innerHTML = message;
+            this.element.insertAdjacentElement('beforeend', this.HTML.def)
+            this.element.insertAdjacentElement('beforeend', this.HTML.message)
+            this.element.addEventListener('mouseover', MouseOver);
+            this.element.addEventListener('mouseout', MouseOut);
+            this.element.addEventListener('click', () => { Click(); this.element.remove(); });
+            cell1.popupList.push(this.element);
+            if (cell2) cell2.popupList.push(this.element);
+        }
+        var canope = document.querySelector('[popupCanope]');
+        addPopup = popup => {
+            var Ppp = new Popup(popup.def, popup.message, popup.type, popup.MouseOver, popup.MouseOut, popup.Click, popup.date, popup.cell1, popup.cell2);
+            var wrap = document.createElement('div');
+            wrap.toggleAttribute('popupWrap');
+            wrap.insertAdjacentElement('afterbegin', Ppp.element)
+            canope.insertAdjacentElement('beforeend', wrap);
+        }
+    </script>
+    <script>
+        var options = document.querySelector('[options]');
+        var settings = document.querySelector("[for='settings']");
+        oncontextmenu = e => {
+            e.preventDefault()
+            options.style.left = e.x + 'px';
+            options.style.top = e.y + 'px';
+            options.show();
+        }
+        onclick = e => {
+            var Oleft = options.offsetLeft,
+                Oright = Oleft + options.offsetWidth,
+                Otop = options.offsetTop,
+                Obottom = Otop + options.offsetHeight;
+            if (e.x < Oleft || e.x > Oright || e.y < Otop || e.y > Obottom) options.hide();
+            var Sleft = settings.offsetLeft,
+                Sright = Sleft + settings.offsetWidth,
+                Stop = settings.offsetTop,
+                Sbottom = Stop + settings.offsetHeight;
+            if (e.x < Sleft || e.x > Sright || e.y < Stop || e.y > Sbottom) { settings.hide(); for (s in displaysChange) displaysChange[s].hide() };
+        }
+        onkeydown = e => {
+            var focus = document.querySelector('[edit].focus');
+            if (focus) {
+                if (e.key.includes('Arrow')) {
+                    if (e.key == "ArrowLeft" && focus.cell.x > 0) {
+                        focus.classList.remove('focus');
+                        table.cellToElmnt({ x: focus.cell.x - 1, y: focus.cell.y }).classList.add('focus');
+                    } else if (e.key == "ArrowUp" && focus.cell.y > 0) {
+                        focus.classList.remove('focus');
+                        table.cellToElmnt({ x: focus.cell.x, y: focus.cell.y - 1 }).classList.add('focus');
+                    } else if (e.key == "ArrowRight" && focus.cell.x < table.l.x - 1) {
+                        focus.classList.remove('focus');
+                        table.cellToElmnt({ x: focus.cell.x + 1, y: focus.cell.y }).classList.add('focus');
+                    } else if (e.key == "ArrowDown" && focus.cell.y < table.l.y - 1) {
+                        focus.classList.remove('focus');
+                        table.cellToElmnt({ x: focus.cell.x, y: focus.cell.y + 1 }).classList.add('focus');
+                    }
+                } else if (focus.getAttribute('edit') == 'true') {
+                    if (e.ctrlKey || e.altKey) e.preventDefault()
+                    var i = {
+                        key: e.key,
+                        ctrlKey: e.ctrlKey,
+                        altKey: e.altKey
+                    };
+                    i.target = focus;
+                    focus.onkeydown(i);
+                }
+            }
+        }
+        document.onmouseleave = e => {
+            if (!tectonic.isBlurry())
+                pause(document.querySelectorAll('[option]')[0])
+        }
+        document.onmouseenter = e => {
+            var openeds = document.querySelectorAll('[type="modal"][open="true"]')
+            if (tectonic.isBlurry() && openeds.length == 0)
+                pause(document.querySelectorAll('[option]')[0])
+        }
+        onmousemove = e => { this.MousePosition = { x: e.x, y: e.y } }
+
+        document.querySelectorAll('input[type="password"]').forEach(input => input.onkeydown = e => {
+            console.log(e)
+            if ((e.key == 'c' || e.key == 'C') && e.ctrlKey) {
+                e.preventDefault()
+            }
+        })
+    </script>
+    <script>
+        function chronometer() {
+            this.path = [];
+            this.timeRun = { milliseconds: 0, seconds: 0, minutes: 0, hours: 0, days: 0 };
+            timeCount = { days: 10 ** 9, hours: 24, minutes: 60, seconds: 60, milliseconds: 1000 }
+            this.reset = () => { this.path = []; this.timeRun = { milliseconds: 0, seconds: 0, minutes: 0, hours: 0, days: 0 }; }
+            this.start = () => { this.path = [getDateObj()]; }
+            this.pauseStart = () => {
+                var newObjDate = getDateObj();
+                var timePlus = calculateTime(this.path[this.path.length - 1], newObjDate)
+                this.path.push(newObjDate)
+                this.timeRun = addTimes(this.timeRun, timePlus);
+                return this.timeRun
+            }
+            this.pauseEnd = () => {
+                this.path.push(getDateObj());
+            }
+            this.stop = () => {
+                var newObjDate = getDateObj();
+                var timePlus = calculateTime(this.path[this.path.length - 1], newObjDate)
+                this.timeRun = addTimes(this.timeRun, timePlus);
+                this.path = [];
+                setTimeout(() => {
+                    this.timeRun = { milliseconds: 0, seconds: 0, minutes: 0, hours: 0, days: 0 };
+                }, 1)
+                return this.timeRun;
+            }
+            calculateTime = (start, end) => {
+                this.timeRunV1 = { milliseconds: 0, seconds: 0, minutes: 0, hours: 0, days: 0 };
+                var left = 0;
+                for (t in this.timeRunV1) {
+                    var n1 = end[t] - start[t] - left
+                    if (n1 < 0) {
+                        left = 1
+                        n1 += timeCount[t]
+                    } else { left = 0 }
+                    this.timeRunV1[t] = n1
+                }
+                return this.timeRunV1
+            }
+            addTimes = (time1, time2) => {
+                this.timeRunV2 = { milliseconds: 0, seconds: 0, minutes: 0, hours: 0, days: 0 };
+                var left = 0;
+                for (t in this.timeRunV2) {
+                    var n2 = time1[t] + time2[t] + left;
+                    left = 0;
+                    while (n2 > timeCount[t]) {
+                        left += 1
+                        n2 -= timeCount[t]
+                    }
+                    this.timeRunV2[t] = n2
+                }
+                return this.timeRunV2
+            }
+        }
+    </script>
+    <script>createTectonic()</script>
+    <script>
+        var JLlanguage = { 'a': '⠁', 'e': '⠂', 'i': '⠃', 'o': '⠄', 'u': '⠅', 'y': '⠆', 'b': '⠇', 'c': '⠈', 'd': '⠉', 'f': '⠊', 'g': '⠋', 'h': '⠌', 'j': '⠍', 'k': '⠎', 'l': '⠏', 'm': '⠐', 'n': '⠑', 'p': '⠒', 'q': '⠓', 'r': '⠔', 's': '⠕', 't': '⠖', 'v': '⠗', 'w': '⠘', 'x': '⠙', 'z': '⠚', 'A': '⠛', 'E': '⠜', 'I': '⠝', 'O': '⠞', 'U': '⠟', 'Y': '⠠', 'B': '⠡', 'C': '⠢', 'D': '⠣', 'F': '⠤', 'G': '⠥', 'H': '⠦', 'J': '⠧', 'K': '⠨', 'L': '⠩', 'M': '⠪', 'N': '⠫', 'P': '⠬', 'Q': '⠭', 'R': '⠮', 'S': '⠯', 'T': '⠰', 'V': '⠱', 'W': '⠲', 'X': '⠳', 'Z': '⠴', '3': '⠵', '1': '⠶', '4': '⠷', '5': '⠸', '9': '⠹', '2': '⠺', '6': '⠻', '8': '⠼', '7': '⠽', '0': '⠾', }
+        var OURlanguage = { '⠁': 'a', '⠂': 'e', '⠃': 'i', '⠄': 'o', '⠅': 'u', '⠆': 'y', '⠇': 'b', '⠈': 'c', '⠉': 'd', '⠊': 'f', '⠋': 'g', '⠌': 'h', '⠍': 'j', '⠎': 'k', '⠏': 'l', '⠐': 'm', '⠑': 'n', '⠒': 'p', '⠓': 'q', '⠔': 'r', '⠕': 's', '⠖': 't', '⠗': 'v', '⠘': 'w', '⠙': 'x', '⠚': 'z', '⠛': 'A', '⠜': 'E', '⠝': 'I', '⠞': 'O', '⠟': 'U', '⠠': 'Y', '⠡': 'B', '⠢': 'C', '⠣': 'D', '⠤': 'F', '⠥': 'G', '⠦': 'H', '⠧': 'J', '⠨': 'K', '⠩': 'L', '⠪': 'M', '⠫': 'N', '⠬': 'P', '⠭': 'Q', '⠮': 'R', '⠯': 'S', '⠰': 'T', '⠱': 'V', '⠲': 'W', '⠳': 'X', '⠴': 'Z', '⠵': '3', '⠶': '1', '⠷': '4', '⠸': '5', '⠹': '9', '⠺': '2', '⠻': '6', '⠼': '8', '⠽': '7', '⠾': '0', }
+
+        Object.defineProperties(String.prototype, {
+            decodeJL: {
+                value: function () {
+                    var decodedText = this;
+                    for (l in OURlanguage)
+                        decodedText = decodedText.replaceAll(l, OURlanguage[l])
+                    return decodedText
+                }
+            },
+            encodeJL: {
+                value: function () {
+                    var encodedText = this;
+                    for (l in JLlanguage)
+                        encodedText = encodedText.replaceAll(l, JLlanguage[l])
+                    return encodedText;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

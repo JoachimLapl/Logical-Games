@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Jeu Logic de Mario mini-games</title>
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%0A%20%20%20viewBox%3D%22-5%20-5%2010%2010%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20gradientTransform%3D%22rotate(70)%22%3E%0A%20%20%20%20%20%20%3Cstop%20style%3D%22stop-color%3A%23fbff10%22%20offset%3D%220%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20style%3D%22stop-color%3A%23ff9404%22%20offset%3D%221%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Cpath%20style%3D%22fill%3Aurl(%23g)%3Bstroke%3A%23000%3Bstroke-width%3A.4%3Bstroke-linejoin%3Around%22%20d%3D%22m-4.8-4.8v9.6h9.6v-9.6zM-2.7-2.8h1.5v1.5h-1.5zM1.2-2.8h1.5v1.5h-1.5zM-3%2C.5h6v%201.5h-6z%22%2F%3E%0A%3C%2Fsvg%3E%0A">
+    <link rel="icon" size="192x192"
+        href="data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%0A%20%20%20viewBox%3D%22-5%20-5%2010%2010%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20gradientTransform%3D%22rotate(70)%22%3E%0A%20%20%20%20%20%20%3Cstop%20style%3D%22stop-color%3A%23fbff10%22%20offset%3D%220%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20style%3D%22stop-color%3A%23ff9404%22%20offset%3D%221%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Cpath%20style%3D%22fill%3Aurl(%23g)%3Bstroke%3A%23000%3Bstroke-width%3A.4%3Bstroke-linejoin%3Around%22%20d%3D%22m-4.8-4.8v9.6h9.6v-9.6zM-2.7-2.8h1.5v1.5h-1.5zM1.2-2.8h1.5v1.5h-1.5zM-3%2C.5h6v%201.5h-6z%22%2F%3E%0A%3C%2Fsvg%3E%0A">
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        table {
+            height: 100vmin;
+            width: 100vmin;
+            box-shadow: 0 0 3px #555;
+            background: #555a;
+        }
+
+        td {
+            transition: transform .15s, box-shadow .15s;
+            cursor: pointer;
+        }
+
+        td:hover {
+            box-shadow: inset 0 0 1vmin #555;
+            transform: scale(1.2);
+            border-radius: 10%;
+        }
+
+        @keyframes heads {
+            0% {
+                transform: rotateY(0deg);
+                background: #000;
+            }
+
+            50% {
+                background: #fff;
+            }
+
+            100% {
+                transform: rotateY(180deg);
+                background: #fff;
+            }
+        }
+
+        @keyframes tails {
+            0% {
+                transform: rotateY(0deg);
+                background: #fff;
+            }
+
+            50% {
+                background: #000;
+            }
+
+            100% {
+                transform: rotateY(180deg);
+                background: #000;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <table></table>
+    <script>
+        const $ = s => document.querySelector(s);
+
+        function Element(tag, attributes = {}, methods = {}) {
+            this.r = document.createElement(tag);
+            for (let i in attributes) {
+                this.r.setAttribute(i, attributes[i]);
+            };
+            for (let i in methods) {
+                this.r[i] = methods[i];
+            };
+            return this.r;
+        };
+
+        Object.defineProperties(Array.prototype, {
+            fillRows: {
+                value: function (n, m) {
+                    for (let i = 0; i < n; i++) {
+                        this[i] = new Array(m).fill(0);
+                    };
+                    return this;
+                }
+            },
+            str: {
+                get: function () {
+                    return `[\n${this.map(r => `[${r.join()}]`).join(`,/n`)}/n]`;
+                }
+            }
+        });
+
+        const game = {
+            table: $('table'),
+            init: function () {
+                this.table.innerHTML = "";
+                for (let i = 0; i < this.height; i++) {
+                    const tr = new Element('tr');
+                    this.table.appendChild(tr);
+                    for (let j = 0; j < this.width; j++) {
+                        const td = new Element('td');
+                        tr.appendChild(td);
+                        td.style.backgroundColor = this.d[i][j] ? '#000' : '#fff';
+                        td.row = i;
+                        td.col = j;
+                        td.onclick = function ({ target }) {
+                            const [x, y] = [target.col, target.row];
+                            this.d[y][x] = Number(!this.d[y][x]);
+                            target.style.animation = animations[this.d[y][x] ? 'turnBlack' : 'turnWhite'];
+                            setTimeout(function () {
+                                this.el.style.background = this.b ? '#000' : '#fff';
+                                this.el.style.animation = 'unset';
+                            }.bind({ b: this.d[y][x], el: target }), 1000)
+                        }.bind(this);
+                    };
+                };
+            },
+            d: [],
+            chosenheight: 0,
+            chosenwidth: 0
+        };
+
+        const changeGameWidth = function () {
+            const nst = prompt('width:', 'number');
+            if (nst) {
+                const n = Number(nst), m = Math.abs(n - game.width);
+                game.chosenwidth = n;
+                console.log(n, m)
+                if (n > game.width) {
+                    game.d = game.d.map(r => r = r.concat(new Array(m).fill(0)));
+                } else {
+                    game.d.forEach(r => r.splice(n, m));
+                }
+            };
+            game.init()
+        };
+        const changeGameHeight = function () {
+            const nst = prompt('height:', 'number');
+            if (nst) {
+                const n = Number(nst), m = Math.abs(n - game.height);
+                game.chosenheight = n;
+                if (n > game.height) {
+                    game.d = game.d.concat([].fillRows(m, game.chosenwidth));
+                } else {
+                    game.d.splice(n, m);
+                };
+            };
+            game.init()
+        };
+        const drawWithFunction = function () {
+            const fst = prompt('write drawing function:', '()=>boolean');
+            if (fst) {
+                const f = eval(fst);
+                game.d = game.d.map((r, i) => r.map((c, j) => Number(f(j, i))));
+            };
+            game.init()
+        };
+
+        Object.defineProperties(game, {
+            size: {
+                get: function () {
+                    return [this.width, this.height];
+                }
+            },
+            width: {
+                get: function () {
+                    return this.d?.[0]?.length || 0;
+                }
+            },
+            height: {
+                get: function () {
+                    return this.d?.length || 0;
+                }
+            }
+        });
+
+        const animations = {
+            turnWhite: 'heads 1s linear forwards',
+            turnBlack: 'tails 1s linear forwards'
+        };
+
+        onkeydown = e => {
+            if (e.ctrlKey) {
+                if (e.key === 'v') {
+                    e.preventDefault();
+                    changeGameWidth();
+                } else if (e.key === 'b') {
+                    e.preventDefault();
+                    changeGameHeight();
+                } else if (e.key === 'f') {
+                    e.preventDefault();
+                    drawWithFunction();
+                };
+            };
+        };
+    </script>
+</body>
+
+</html>
