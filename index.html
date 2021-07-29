@@ -42,6 +42,14 @@
         <a href="Rikudo/">Rikudo</a>
         <a href="Démineur/">Démineur</a>
     </div>
+    <script>
+        const $ = (s, p = document, e = "") => p["querySelector" + e](s);
+        const container = $('#container');
+        const children = [...container.children];
+        children.forEach((child, index) => {
+            child.style.background = `hsl(${index * 360 / children.length},100%,50%)`;
+        });
+    </script>
 </body>
 
 </html>
