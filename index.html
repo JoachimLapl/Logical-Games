@@ -22,25 +22,31 @@
             width: 100%;
         }
 
-        #container>* {
-            height: 100%;
-            width: 100%;
-            display: flex;
-            text-align: center;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: #fff;
-            cursor: pointer;
-        }
+#container>* {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+#container>*:hover {
+    text-decoration: underline;
+}
     </style>
 </head>
 
 <body>
     <div id="container">
         <a href="Tectonics/">Tectonics</a>
+        <a href="TectonicsHEX/">Tectonics HEX</a>
         <a href="Rikudo/">Rikudo</a>
         <a href="Démineur/">Démineur</a>
+        <a href="mario mini-game/">Mario Mini-Game</a>
     </div>
     <script>
         const $ = (s, p = document, e = "") => p["querySelector" + e](s);
