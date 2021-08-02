@@ -15,25 +15,7 @@
             margin: 0;
             user-select: none;
             background: #175f0f;
-            /* display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center; */
         }
-
-        /* table {
-            background: #000;
-        }
-
-        td {
-            background: #fff;
-            height: 50px;
-            width: 50px;
-        }
-
-        .decouverte {
-            background: #f00;
-        } */
     </style>
 </head>
 
@@ -73,16 +55,6 @@
         const links = [...document.getElementsByTagName('link')];
         const separate = 1;
         const a = 50;
-        // function Element(tag, attributes = {}, methods = {}) {
-        //     this.r = document.createElement(tag);
-        //     for (let i in attributes) {
-        //         this.r.setAttribute(i, attributes[i]);
-        //     };
-        //     for (let i in methods) {
-        //         this.r[i] = methods[i];
-        //     };
-        //     return this.r;
-        // };
         Object.defineProperties(Object.prototype, {
             join: {
                 value: function (f = (i, j) => `${i}="${j}" `) {
@@ -101,7 +73,6 @@
             return this.el;
         }
         function Cell(x, y, parent) {
-            // this.el = new Element('td');
             const g = new SVGElement('g', parent);
             this.el = new SVGElement('rect', g);
             this.el.text = new SVGElement('text', g, { x: 25, y: 25 });
@@ -162,9 +133,7 @@
             };
             return this.el
         };
-        // var cells = [];
         const game = {
-            // table: $('table'),
             svg: $('svg'),
             group: $('[group]'),
             height: 10,
@@ -173,15 +142,11 @@
             indesirableCount: 10,
             init() {
                 this.group.innerHTML = "";
-                // this.table.innerHTML = "";
                 this.cells = [];
                 for (let i = 0; i < this.height; i++) {
-                    // const tr = new Element('tr');
-                    // this.table.appendChild(tr);
                     this.cells[i] = [];
                     for (let j = 0; j < this.width; j++) {
                         const cell = new Cell(j, i, this.group);
-                        // tr.appendChild(cell);
                         this.cells[i][j] = cell;
                     };
                 };
@@ -203,6 +168,8 @@
 
         function createIndesirable() {
         };
+
+        game.init();
     </script>
 </body>
 
