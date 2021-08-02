@@ -109,6 +109,21 @@
                     value: function () {
                         this.classList.add('decouverte');
                         this.text.innerHTML = this.indesirableCloseBy.length;
+                        if (this.indesirableCloseBy.length === 0) {
+                            [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
+                                .map(a => game.cells?.[a[0] + this.row]?.[a[1] + this.col])
+                                .filter(cell => {
+                                    if (cell) {
+                                        return ![...cell.classList].includes('decouverte');
+                                    };
+                                    return false;
+                                })
+                                .forEach((cell, i) => {
+                                    setTimeout(function () {
+                                        this.show();
+                                    }.bind(cell), 500);
+                                });
+                        };
                     }
                 },
                 hide: {
@@ -123,7 +138,6 @@
                 this.show();
                 if (this.isIndesirable) {
                     createIndesirable(this.col, this.row);
-
                     alert('game over!');
                 } else {
                     const stayingcells = game.cellsList.filter(e => ![...e.classList].includes('decouverte'));
