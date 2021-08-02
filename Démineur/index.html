@@ -2,154 +2,207 @@
 <html>
 
 <head>
+    <meta charset="utf-8">
+    <title>Démineur</title>
+    <link rel="apple-touch-icon">
+    <link rel="icon" size="192x192">
     <style>
-        * {
+        html,
+        body,
+        svg {
+            height: 100%;
+            width: 100%;
             margin: 0;
+            user-select: none;
+            background: #175f0f;
+            /* display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center; */
         }
 
-        td[black=true] {
-            background: black;
-            color: white;
+        /* table {
+            background: #000;
         }
-
-        /* td[black=true]::before {
-            content: '⚑';
-        } */
 
         td {
+            background: #fff;
             height: 50px;
             width: 50px;
-            border: 1px solid black;
-            text-align: center;
         }
 
-        [gameBoard] {
-            border-collapse: collapse;
-            width: max-content;
-            height: max-content;
-        }
-
-        svg {
-            position: fixed;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        td[first] {
-            background: transparent;
-            border: none;
-            font-size: 30px;
-        }
+        .decouverte {
+            background: #f00;
+        } */
     </style>
 </head>
 
 <body>
-    <!-- <svg></svg> -->
-    <table gameBoard></table>
-    <button check>Check</button>
+    <svg>
+        <style>
+            text {
+                text-anchor: middle;
+                dominant-baseline: middle;
+                fill: #fff9;
+                font-size: 15px;
+                stroke: none;
+                x: 25;
+                y: 25;
+            }
+
+            rect {
+                height: 50px;
+                width: 50px;
+                rx: 10px;
+                fill: #fff1;
+                cursor: pointer;
+            }
+
+            rect:hover {
+                fill: #fff2;
+            }
+
+            .decouverte, .decouverte:hover {
+                fill: #441e08;
+            }
+        </style>
+        <g group></g>
+    </svg>
     <script>
-        var lines = 10, columns = 10, gameBoard = document.querySelector('table[gameBoard]'), trapsNum = Math.floor(lines * columns / 10);
-        createTableThrough = (table, l, c) => {
-            var str = "";
-            for (x = 0; x < c + 1; x++) {
-                str += '<tr>';
-                for (y = 0; y < l + 1; y++) {
-                    if (y == 0 || x == 0) {
-                        str += '<td first black=false></td>';
-                    } else {
-                        str += '<td black=false></td>';
+        const $ = (s, p = document) => p.querySelector(s);
+        const links = [...document.getElementsByTagName('link')];
+        const separate = 1;
+        const a = 50;
+        // function Element(tag, attributes = {}, methods = {}) {
+        //     this.r = document.createElement(tag);
+        //     for (let i in attributes) {
+        //         this.r.setAttribute(i, attributes[i]);
+        //     };
+        //     for (let i in methods) {
+        //         this.r[i] = methods[i];
+        //     };
+        //     return this.r;
+        // };
+        Object.defineProperties(Object.prototype, {
+            join: {
+                value: function (f = (i, j) => `${i}="${j}" `) {
+                    var str = "";
+                    for (let i in this) {
+                        str += f(i, this[i]);
+                    };
+                    return str;
+                }
+            }
+        });
+        function SVGElement(tag = 'g', parent = game.svg, attributes = {}) {
+            parent.insertAdjacentHTML('beforeend', `<${tag} newsvgel ${attributes.join()}></${tag}>`);
+            this.el = $('[newsvgel]', parent);
+            this.el.removeAttribute('newsvgel');
+            return this.el;
+        }
+        function Cell(x, y, parent) {
+            // this.el = new Element('td');
+            const g = new SVGElement('g', parent);
+            this.el = new SVGElement('rect', g);
+            this.el.text = new SVGElement('text', g, { x: 25, y: 25 });
+            this.el.group = g;
+            g.setAttribute('transform', `translate(${x * a + (x - 1) * separate},${y * a + (y - 1) * separate})`)
+            this.el.col = x;
+            this.el.row = y;
+            this.el.i = false;
+            Object.defineProperties(this.el, {
+                isIndesirable: {
+                    set: function (b) {
+                        this.i = b;
+                        this.toggleAttribute('indesirable', b);
+                    },
+                    get: function () {
+                        return this.i;
+                    }
+                },
+                indesirableCloseBy: {
+                    get: function () {
+                        return [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
+                            .map(a => [a[0] + this.row, a[1] + this.col])
+                            .filter(a => {
+                                const cell = game.cells?.[a[0]]?.[a[1]];
+                                if (cell) {
+                                    return cell.isIndesirable;
+                                };
+                                return false;
+                            });
+                    }
+                },
+                show: {
+                    value: function () {
+                        this.classList.add('decouverte');
+                        this.text.innerHTML = this.indesirableCloseBy.length;
+                    }
+                },
+                hide: {
+                    value: function () {
+                        this.classList.remove('decouverte');
+                        this.text.innerHTML = "";
                     }
                 }
-                str += '</tr>';
-            }
-            table.innerHTML = str;
-            return table;
-        }
+            });
+            this.el.onmousedown = function () {
+                console.log('hi')
+                this.show();
+                if (this.isIndesirable) {
+                    createIndesirable(this.col, this.row);
 
-        const table = createTableThrough(gameBoard, lines, columns);
-        table.l = { x: table.rows[0].cells.length - 1, y: table.rows.length - 1 };
-        table.cellToElmnt = cell => { return table.rows[cell.y].cells[cell.x]; }
-        table.getRandomUntakenCase = () => {
-            var Trap = true, cell;
-            while (Trap) {
-                cell = { x: Math.floor(Math.random() * (table.rows[0].cells.length - 1)) + 1, y: Math.floor(Math.random() * (table.rows.length - 1)) + 1 }
-                Trap = table.cellToElmnt(cell).trap;
+                    alert('game over!');
+                } else {
+                    const stayingcells = game.cellsList.filter(e => ![...e.classList].includes('decouverte'));
+                    if (stayingcells.length === game.indesirableCount) {
+                        alert('well done!')
+                    };
+                };
+            };
+            return this.el
+        };
+        // var cells = [];
+        const game = {
+            // table: $('table'),
+            svg: $('svg'),
+            group: $('[group]'),
+            height: 10,
+            width: 10,
+            cells: [],
+            indesirableCount: 10,
+            init() {
+                this.group.innerHTML = "";
+                // this.table.innerHTML = "";
+                this.cells = [];
+                for (let i = 0; i < this.height; i++) {
+                    // const tr = new Element('tr');
+                    // this.table.appendChild(tr);
+                    this.cells[i] = [];
+                    for (let j = 0; j < this.width; j++) {
+                        const cell = new Cell(j, i, this.group);
+                        // tr.appendChild(cell);
+                        this.cells[i][j] = cell;
+                    };
+                };
+                console.log(game.cells)
+                cells = [...game.cells.map(e => [...e])];
+                this.svg.setAttribute('viewBox', `0 0 ${this.width * a + (this.width - 1) * separate} ${this.height * a + (this.height - 1) * separate}`);
+                const list = this.cellsList;
+                for (let i = 0; i < this.indesirableCount; i++) {
+                    const random = Math.floor(Math.random() * list.length);
+                    const item = list.splice(random, 1)[0];
+                    item.isIndesirable = true;
+                    console.log(item)
+                };
+            },
+            get cellsList() {
+                return this.cells.reduce((s, a) => s.concat(a));
             }
-            return cell;
-        }
+        };
 
-        table.addTraps = trapsNum => {
-            console.log(table);
-            var traps = [];
-            for (t = 0; t < trapsNum; t++) {
-                var cell = table.getRandomUntakenCase();
-                traps[t] = cell;
-                table.cellToElmnt(cell).trap = true;
-                //to be removed after
-                //table.cellToElmnt(cell).setAttribute('black', true);
-            }
-            return traps;
-        }
-
-        demineurBlack = elmnt => {
-            elmnt.onclick = () => {
-                elmnt.setAttribute('black', elmnt.getAttribute('black') == 'false');
-            }
-        }
-
-        table.enableTDpress = () => {
-            for (y = 1; y < table.l.y + 1; y++) {
-                for (x = 1; x < table.l.x + 1; x++) {
-                    demineurBlack(table.cellToElmnt({ x: x, y: y }))
-                }
-            }
-        }
-        table.enableTDpress();
-
-        table.findNumsOfTraps = (traps) => {
-            console.log(traps)
-            table.numsOfTraps = { columns: [], lines: [] };
-            for (y = 1; y < table.l.y + 1; y++) {
-                table.numsOfTraps.lines[y] = 0;
-            }
-            for (x = 1; x < table.l.x + 1; x++) {
-                table.numsOfTraps.columns[x] = 0;
-            }
-            for (t = 0; t < traps.length; t++) {
-                table.numsOfTraps.columns[traps[t].x]++
-                table.numsOfTraps.lines[traps[t].y]++
-            }
-            return table.numsOfTraps;
-        }
-
-        table.addNumbersPerLC = numsOfTraps => {
-            for (y = 1; y < table.l.y + 1; y++) {
-                table.cellToElmnt({ x: 0, y: y }).innerHTML = numsOfTraps.lines[y];
-            }
-            for (x = 1; x < table.l.x + 1; x++) {
-                table.cellToElmnt({ x: x, y: 0 }).innerHTML = numsOfTraps.columns[x];
-            }
-        }
-        table.addNumbersPerLC(table.findNumsOfTraps(table.addTraps(trapsNum)))
-
-        table.check = () => {
-            for (y = 1; y < table.l.y + 1; y++) {
-                for (x = 1; x < table.l.x + 1; x++) {
-                    var elmnt = table.cellToElmnt({ x: x, y: y });
-                    if (elmnt.trap) {
-                        if (elmnt.getAttribute('black') != 'true') {
-                            return false;
-                        }
-                    } else {
-                        if (elmnt.getAttribute('black') == 'true') {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
-        document.querySelector('button[check]').onclick = () => { if (table.check()) { alert('You won!'); table.addNumbersPerLC(table.findNumsOfTraps(table.addTraps(trapsNum))) } };
+        function createIndesirable() {
+        };
     </script>
 </body>
 
