@@ -1,4 +1,3 @@
-
 const $ = (s, p = document) => p.querySelector(s);
 const svg = $('svg'); 
 const svg_margin = 5;
