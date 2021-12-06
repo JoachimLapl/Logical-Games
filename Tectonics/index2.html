@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Tectonics</title>
+    <style>
+        table{
+            background: #000;
+        }
+        td{
+            height:50px;
+            width:50px;
+            background:#fff;
+        }
+    </style>
+    <script src="../src/utils.js"></script>
+    <script src="index.js"></script>
+</head>
+
+<body>
+    <script>
+        const $ = s => document.querySelector(s);
+        const columns = 5, lines = 5, maxG = 5;
+        const matrix = createTectonic(columns, lines, maxG);
+        console.log(matrix)
+        matrix.showValues();
+        new Array(maxG).fill(0).forEach((e,i)=>{
+            const a = matrix.map(e=>e.value===i+1).filter(e=>e);
+            console.log(`%c ${i+1}: %c${a.length} `,'color:#fff;background:#000', 'color:#ff0;background:#000');
+        })
+    </script>
+</body>
+
+</html>

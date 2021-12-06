@@ -6,8 +6,6 @@
         href="https://cdn2.iconfinder.com/data/icons/picons-basic-3/57/basic3-105_calculator-512.png">
     <link rel="icon" size="192x192"
         href="https://cdn2.iconfinder.com/data/icons/picons-basic-3/57/basic3-105_calculator-512.png">
-    <!--<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
     <style>
         * {
             font-family: Times;
@@ -359,84 +357,84 @@
 
         var label_align, label, target = { value: undefined }, signs = { s: { 0: "&plus;", 1: "&minus;", 2: "&times;", 3: "&divide;" } }, numbers = { n: { on: true } }, whole, help = { desk: document.getElementById('help_desk') };
         function checkALL() {
-            if (target.value == undefined || target.value > 999) { console.clear(); Game.changeNumbers(); Game.changeTarget(); Game.style(); };
-            label_align = {
-                id: document.getElementById('label_align'),
-                props: {
-                    left: Number(document.getElementById('label_align').style.left.slice(0, document.getElementById('label_align').style.left.length - 2)),
-                    top: Number(document.getElementById('label_align').style.top.slice(0, document.getElementById('label_align').style.top.length - 2)),
-                    height: document.getElementById('label_align').clientHeight,
-                    width: document.getElementById('label_align').clientWidth
-                }
-            };
-            label = {
-                id: document.querySelector('label'),
-                props: {
-                    left: Number(document.querySelector('label').style.left.slice(0, document.querySelector('label').style.left.length - 2)),
-                    top: Number(document.querySelector('label').style.top.slice(0, document.querySelector('label').style.top.length - 2)),
-                    height: document.querySelector('label').clientHeight,
-                    width: document.querySelector('label').clientWidth,
-                    padding: 5
-                }
-            };
-            target.id = document.getElementById('target');
-            target.props = {
-                left: Number(document.getElementById('target').style.left.slice(0, document.getElementById('target').style.left.length - 2)),
-                top: Number(document.getElementById('target').style.top.slice(0, document.getElementById('target').style.top.length - 2)),
-                height: document.getElementById('target').clientHeight,
-                width: document.getElementById('target').clientWidth
-            };
-            signs = {
-                id: document.querySelectorAll('table')[0],
-                props: {
-                    left: Number(document.getElementById('signs').style.left.slice(0, document.getElementById('signs').style.left.length - 2)),
-                    top: Number(document.getElementById('signs').style.top.slice(0, document.getElementById('signs').style.top.length - 2)),
-                    height: document.getElementById('signs').clientHeight,
-                    width: document.getElementById('signs').clientWidth
-                },
-                s: {
-                    0: "&plus;",
-                    1: "&minus;",
-                    2: "&times;",
-                    3: "&divide;"
-                },
-                inns: {
-                    /*"+": this.id.rows[0].cells[0],
-                    "-": this.id.rows[0].cells[1],
-                    "*": this.id.rows[0].cells[2],
-                    "/": this.id.rows[0].cells[3],*/
-                }
-            };
-            numbers.id = document.querySelectorAll('table')[1];
-            numbers.props = {
-                left: Number(document.getElementById('numbers').style.left.slice(0, document.getElementById('numbers').style.left.length - 2)),
-                top: Number(document.getElementById('numbers').style.top.slice(0, document.getElementById('numbers').style.top.length - 2)),
-                height: document.getElementById('numbers').clientHeight,
-                width: document.getElementById('numbers').clientWidth
-            };
-            container = {
-                id: document.getElementById('container'),
-                props: {
-                    left: Number(document.getElementById('container').style.left.slice(0, document.getElementById('container').style.left.length - 2)),
-                    top: Number(document.getElementById('container').style.top.slice(0, document.getElementById('container').style.top.length - 2)),
-                    height: document.getElementById('container').clientHeight,
-                    width: document.getElementById('container').clientWidth
-                },
-                answer: { id: document.querySelectorAll('table')[2] }
-            };
-            whole = {
-                id: document.getElementById('le_compte_est_bon'),
-                props: {
-                    left: Number(document.getElementById('le_compte_est_bon').style.left.slice(0, document.getElementById('le_compte_est_bon').style.left.length - 2)),
-                    top: Number(document.getElementById('le_compte_est_bon').style.top.slice(0, document.getElementById('le_compte_est_bon').style.top.length - 2)),
-                    height: document.getElementById('le_compte_est_bon').clientHeight,
-                    width: document.getElementById('le_compte_est_bon').clientWidth
-                }
-            };
-            help = {
-                id: document.getElementById('help'),
-                desk: document.getElementById('help_desk')
-            };
+            // if (target.value == undefined || target.value > 999) { console.clear(); Game.changeNumbers(); Game.changeTarget(); Game.style(); };
+            // label_align = {
+            //     id: document.getElementById('label_align'),
+            //     props: {
+            //         left: Number(document.getElementById('label_align').style.left.slice(0, document.getElementById('label_align').style.left.length - 2)),
+            //         top: Number(document.getElementById('label_align').style.top.slice(0, document.getElementById('label_align').style.top.length - 2)),
+            //         height: document.getElementById('label_align').clientHeight,
+            //         width: document.getElementById('label_align').clientWidth
+            //     }
+            // };
+            // label = {
+            //     id: document.querySelector('label'),
+            //     props: {
+            //         left: Number(document.querySelector('label').style.left.slice(0, document.querySelector('label').style.left.length - 2)),
+            //         top: Number(document.querySelector('label').style.top.slice(0, document.querySelector('label').style.top.length - 2)),
+            //         height: document.querySelector('label').clientHeight,
+            //         width: document.querySelector('label').clientWidth,
+            //         padding: 5
+            //     }
+            // };
+            // target.id = document.getElementById('target');
+            // target.props = {
+            //     left: Number(document.getElementById('target').style.left.slice(0, document.getElementById('target').style.left.length - 2)),
+            //     top: Number(document.getElementById('target').style.top.slice(0, document.getElementById('target').style.top.length - 2)),
+            //     height: document.getElementById('target').clientHeight,
+            //     width: document.getElementById('target').clientWidth
+            // };
+            // signs = {
+            //     id: document.querySelectorAll('table')[0],
+            //     props: {
+            //         left: Number(document.getElementById('signs').style.left.slice(0, document.getElementById('signs').style.left.length - 2)),
+            //         top: Number(document.getElementById('signs').style.top.slice(0, document.getElementById('signs').style.top.length - 2)),
+            //         height: document.getElementById('signs').clientHeight,
+            //         width: document.getElementById('signs').clientWidth
+            //     },
+            //     s: {
+            //         0: "&plus;",
+            //         1: "&minus;",
+            //         2: "&times;",
+            //         3: "&divide;"
+            //     },
+            //     inns: {
+            //         /*"+": this.id.rows[0].cells[0],
+            //         "-": this.id.rows[0].cells[1],
+            //         "*": this.id.rows[0].cells[2],
+            //         "/": this.id.rows[0].cells[3],*/
+            //     }
+            // };
+            // numbers.id = document.querySelectorAll('table')[1];
+            // numbers.props = {
+            //     left: Number(document.getElementById('numbers').style.left.slice(0, document.getElementById('numbers').style.left.length - 2)),
+            //     top: Number(document.getElementById('numbers').style.top.slice(0, document.getElementById('numbers').style.top.length - 2)),
+            //     height: document.getElementById('numbers').clientHeight,
+            //     width: document.getElementById('numbers').clientWidth
+            // };
+            // container = {
+            //     id: document.getElementById('container'),
+            //     props: {
+            //         left: Number(document.getElementById('container').style.left.slice(0, document.getElementById('container').style.left.length - 2)),
+            //         top: Number(document.getElementById('container').style.top.slice(0, document.getElementById('container').style.top.length - 2)),
+            //         height: document.getElementById('container').clientHeight,
+            //         width: document.getElementById('container').clientWidth
+            //     },
+            //     answer: { id: document.querySelectorAll('table')[2] }
+            // };
+            // whole = {
+            //     id: document.getElementById('le_compte_est_bon'),
+            //     props: {
+            //         left: Number(document.getElementById('le_compte_est_bon').style.left.slice(0, document.getElementById('le_compte_est_bon').style.left.length - 2)),
+            //         top: Number(document.getElementById('le_compte_est_bon').style.top.slice(0, document.getElementById('le_compte_est_bon').style.top.length - 2)),
+            //         height: document.getElementById('le_compte_est_bon').clientHeight,
+            //         width: document.getElementById('le_compte_est_bon').clientWidth
+            //     }
+            // };
+            // help = {
+            //     id: document.getElementById('help'),
+            //     desk: document.getElementById('help_desk')
+            // };
         };
         Math.operator = function (num1, operator, num2) {
             if (operator == "plus" || operator == "add" || operator == "+" || operator == "&plus;") {
