@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démineur Hex</title>
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%206.5149999%207.5320001%22%3E%3Cg%20style%3D%22stroke-linecap%3Around%3Bstroke-linejoin%3Around%3Bstroke-width%3A0.26458332%3B%22%3E%3Cpath%20style%3D%22fill%3A%2300fd09%3Bstroke%3A%23106f00%3B%22%20d%3D%22m%204.82018%207.4%20l%20-3.12526%200%20l%20-1.56263%20-2.70656%20l%201.56263%20-2.70655%20l%203.12526%200%20l%201.56263%202.70655%20Z%22%2F%3E%3Cpath%20stroke%3D%22%23000000%22%20d%3D%22M%202.92671%204.89836%20V%200.1338%22%2F%3E%3Cpath%20style%3D%22fill%3A%23fd0000%3Bstroke%3A%23780000%22%20d%3D%22m%202.92671%200.1338%20l%202.74033%201.18117%20l%20-2.74033%201.06306%20Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <link rel="icon" size="192x192"
+        href="data:image/svg+xml;utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%206.5149999%207.5320001%22%3E%3Cg%20style%3D%22stroke-linecap%3Around%3Bstroke-linejoin%3Around%3Bstroke-width%3A0.26458332%3B%22%3E%3Cpath%20style%3D%22fill%3A%2300fd09%3Bstroke%3A%23106f00%3B%22%20d%3D%22m%204.82018%207.4%20l%20-3.12526%200%20l%20-1.56263%20-2.70656%20l%201.56263%20-2.70655%20l%203.12526%200%20l%201.56263%202.70655%20Z%22%2F%3E%3Cpath%20stroke%3D%22%23000000%22%20d%3D%22M%202.92671%204.89836%20V%200.1338%22%2F%3E%3Cpath%20style%3D%22fill%3A%23fd0000%3Bstroke%3A%23780000%22%20d%3D%22m%202.92671%200.1338%20l%202.74033%201.18117%20l%20-2.74033%201.06306%20Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+    <style>
+        html,
+        body,
+        svg#main {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: #040;
+            user-select: none;
+        }
+
+        svg#template {
+            display: none;
+        }
+
+        text {
+            font-family: consolas;
+            dominant-baseline: middle;
+            text-anchor: middle;
+            font-size: 4px;
+            fill: #dc9;
+        }
+    </style>
+</head>
+
+<body>
+    <svg id="template" viewBox="-25 -25 50 50" stroke-linejoin="round">
+        <!-- <path id="hex" />
+        <use href="#hex" fill="#070" stroke="#040" id="saf" cursor="pointer" />
+        <use href="#hex" fill="#421" stroke="#211" id="esc" />
+        <use href="#hex" fill="#f00" stroke="#800" id="bom" /> -->
+        <g id="flag"
+            style="stroke-linecap:round;stroke-linejoin:round;stroke-width:0.26458332;translate:-4px -6px;scale:1.3;">
+            <path stroke="#000000" d="M 2.92671 4.89836 V 0.1338" />
+            <path style="fill:#f00;stroke:#800" d="m 2.92671 0.1338 l 2.74033 1.18117 l -2.74033 1.06306 Z" />
+        </g>
+    </svg>
+    <svg id="main" viewBox="-50 -50 100 100">
+        <g id="tile_holder" stroke-linejoin="round" />
+        <g id="flag_holder"/>
+    </svg>
+    <script>
+        const $ = (s, p = document) => p.querySelector(s);
+        const svg = $('#main');
+        const flag = $('#flag');
+        const cols = Number(prompt("nombre de colonnes:", "20") || 20);
+        const rows = Number(prompt("nombre de de lignes:", "40") || 40);
+        const proba = Number(prompt("probabilité:", ".2") || .2);
+        const r = 5;
+        const rw = .5;
+        Object.defineProperties(HTMLCollection.prototype, {
+            last: {
+                get: function () {
+                    return this[this.length - 1];
+                }
+            }
+        })
+
+        const a = Math.round(Math.sqrt(3)*100)/100;
+        class Tile {
+            static holder = $('#tile_holder', svg);
+            static flags = $('#flag_holder', svg);
+            static radius = 5;
+            static width = .5;
+            static RW = Tile.radius + Tile.width / 2;
+            static data = "M" + [[2,0],[1,a],[-1,a],[-2,0],[-1,-a],[1,-a]].map(e=>e.map(i=>i*Tile.radius*.5).join(',')).join(' ') + ' z';
+            constructor(i, j, b = false) {
+                this.x = i;
+                this.y = j;
+                this.bomb = b;
+                this.flaged = false;
+                this.p = [3 * Tile.RW * (this.x + (this.y % 2) / 2), Math.sqrt(3) / 2 * Tile.RW * this.y];
+                Tile.holder.insertAdjacentHTML('beforeend', `<path transform="translate(${this.p[0]}, ${this.p[1]})" stroke-width="${Tile.width}" d="${Tile.data}" fill="#070" stroke="#040" cursor="pointer"/>`);
+                this.element = Tile.holder.children.last;
+                this.element.x = i, this.element.y = j;
+                this.number = 0;
+                this.opened = false;
+                this.element.onmouseover = ({ target }) => {
+                    target.style.fill = "#0a0";
+                }
+                this.element.onmouseout = ({ target }) => {
+                    target.style.fill = "#070";
+                }
+                this.element.onclick = ({ target }) => {
+                    table.open(target.x, target.y);
+                }
+                this.element.oncontextmenu = e => {
+                    e.preventDefault();
+                    if (this.flaged) {
+                        this.flaged = false;
+                        this.flag.remove();
+                    } else {
+                        this.flaged = true;
+                        Tile.flags.insertAdjacentHTML('beforeend', `<g transform="translate(${this.p[0]}, ${this.p[1]})">${flag.outerHTML}<g/>`);
+                        this.flag = Tile.flags.children.last;
+                    }
+                }
+            }
+            open() {
+                this.opened = true;
+                this.element.onmouseover = this.element.onmouseout = this.element.onclick = () => void {};
+                this.element.oncontextmenu = e => e.preventDefault();
+                this.element.style.fill = this.bomb ? '#f00' : '#421';
+                this.element.style.stroke = this.bomb ? '#800' : '#221';
+                this.element.style.cursor = "default";
+                if (!this.bomb && this.number) {
+                    Tile.holder.insertAdjacentHTML('beforeend', `<text x="${this.p[0]}" y="${this.p[1]}">${this.number}</text>`);
+                    this.text_element = Tile.holder.children.last;
+                }
+            }
+            mouseover() {
+                if (!this.opened) {
+                    this.element.style.fill = "#0a0";
+                }
+            }
+            mouseout() {
+                if (!this.opened) {
+                    this.element.style.fill = "#070";
+                }
+            }
+        }
+
+
+        class Table {
+            constructor(w, h, proba) {
+                for (let i = 0; i < h; i++) {
+                    this[i] = [];
+                    for (let j = 0; j < w; j++) {
+                        this[i][j] = new Tile(j, i, Math.random() < proba)
+                    }
+                }
+                this.range = [[0, w], [0, h]]
+                this.prob = proba;
+                svg.viewBox.baseVal.x = -Tile.RW;
+                svg.viewBox.baseVal.y = -Math.sqrt(3) / 2 * Tile.RW;
+                svg.viewBox.baseVal.width = 3 * Tile.RW * (w - .5) + 2 * Tile.RW;
+                svg.viewBox.baseVal.height = Math.sqrt(3) / 2 * Tile.RW * (h + 1);
+            }
+            [Symbol.iterator]() { var index = 0; const data = this; return { next: () => ({ value: data[index++], done: index - 1 === data.length }) }; }
+            forEach(fn) {
+                for (let i = this.range[1][0]; i < this.range[1][1]; i++)
+                    for (let j = this.range[0][0]; j < this.range[0][1]; j++)
+                        fn(this[i][j], i, j);
+            }
+            static connectedeven = [[-1, -1], [-1, 1], [0, 2], [0, 1], [0, -1], [0, -2]]
+            static connectedodd = [[1, -1], [1, 1], [0, 2], [0, 1], [0, -1], [0, -2]]
+            around(x, y, fn) {
+                [Table.connectedeven, Table.connectedodd][y % 2].forEach(e => {
+                    const vx = x + e[0];
+                    const vy = y + e[1];
+                    if (vx >= this.range[0][0] && vx < this.range[0][1] && vy >= this.range[1][0] && vy < this.range[1][1])
+                        fn(this[vy][vx], vy, vx);
+                })
+            }
+            calculate() {
+                this.forEach(t => {
+                    t.number = 0;
+                    this.around(t.x, t.y, e => t.number += e.bomb || 0);
+                })
+            }
+            update() {
+                if (this.origin.x > -(this.range[0][0] + 1) * Tile.size) this.origin.x = -(this.range[0][0] + 1) * Tile.size;
+                if (this.origin.x < svg.viewBox.animVal.width - (this.range[0][1] - 1) * Tile.size) this.origin.x = svg.viewBox.animVal.width - (this.range[0][1] - 1) * Tile.size;
+                if (this.origin.y > -(this.range[1][0] + 1) * Tile.size) this.origin.y = -(this.range[1][0] + 1) * Tile.size;
+                if (this.origin.y < svg.viewBox.animVal.height - (this.range[1][1] - 1) * Tile.size) this.origin.y = svg.viewBox.animVal.height - (this.range[1][1] - 1) * Tile.size;
+                [svg.viewBox.baseVal.x, svg.viewBox.baseVal.y] = this.origin.opposite;
+            }
+            open(x, y) {
+                const tile = this[y][x];
+                if (!tile.opened && !tile.flaged) {
+                    tile.open();
+                    if (tile.number === 0)
+                        this.around(x, y, (_, i, j) => requestAnimationFrame(function () { table.open(this.j, this.i) }.bind({ i: i, j: j })))
+                }
+            }
+        }
+
+        const table = new Table(cols, rows, proba);
+        table.calculate();
+    </script>
+</body>
+
+</html>
